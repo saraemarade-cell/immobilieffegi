@@ -470,7 +470,16 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .hero__panel-content { position: relative; z-index: 1; }
 
 .hero__title { font-size: clamp(27px, 5.4vw, 52px); line-height: 1.12; letter-spacing: -0.01em; color: var(--c-anthracite); margin-bottom: var(--space-3); }
-.mask-line { display: block; overflow: hidden; }
+/* La tendina del titolo taglia con overflow: hidden, e con line-height 1.1 il
+   riquadro di riga finisce sopra i discendenti: la "g" di "Effegi" veniva
+   tagliata sotto. Il padding allarga solo il riquadro di ritaglio, il margine
+   negativo lo riporta indietro: l'impaginazione non cambia di un pixel. */
+.mask-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.2em;
+  margin-bottom: -0.2em;
+}
 .mask-line__text { display: block; will-change: transform; }
 
 .hero__lead { font-size: 16px; color: var(--c-dark-gray); margin-bottom: var(--space-3); }
@@ -601,7 +610,6 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   max-width: 54ch;
   margin-bottom: var(--space-3);
   padding-bottom: var(--space-2);
-  border-bottom: 1px solid var(--c-border);
   line-height: 1.45;
 }
 .manifesto__lead strong { color: var(--c-anthracite); font-weight: 700; }
@@ -647,6 +655,66 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 }
 .manifesto-item__title { font-family: var(--font-heading); font-weight: 700; font-size: 17px; }
 .manifesto-item__trigger:hover .manifesto-item__title { color: var(--c-green); }
+
+/* Segnale di apertura. La barra verde a sinistra dice quale punto e' aperto
+   ma non che i punti si possono aprire: serve un indizio prima del clic.
+   Niente freccia (curve fuori dal linguaggio del brand): un quadrato con un
+   piu' che diventa meno, costruito con due barre. Solo decorativo, lo stato
+   vero lo dice aria-expanded sul bottone. */
+.manifesto-item__sign {
+  flex: 0 0 auto;
+  margin-left: auto;
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--c-border);
+  transition: border-color var(--dur-base) var(--ease-standard),
+              background var(--dur-base) var(--ease-standard);
+}
+.manifesto-item__sign::before,
+.manifesto-item__sign::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: var(--c-dark-gray);
+  transform: translate(-50%, -50%);
+  transition: transform var(--dur-base) var(--ease-out),
+              opacity var(--dur-base) var(--ease-out),
+              background var(--dur-base) var(--ease-standard);
+}
+.manifesto-item__sign::before { width: 10px; height: 2px; }
+.manifesto-item__sign::after { width: 2px; height: 10px; }
+
+/* Aperto: la barra verticale scompare ruotando, restano il meno e il verde. */
+.manifesto-item.is-active .manifesto-item__sign { border-color: var(--c-green); }
+.manifesto-item.is-active .manifesto-item__sign::before { background: var(--c-green); }
+.manifesto-item.is-active .manifesto-item__sign::after {
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.manifesto-item__trigger:hover .manifesto-item__sign { border-color: var(--c-green); }
+.manifesto-item__trigger:hover .manifesto-item__sign::before,
+.manifesto-item__trigger:hover .manifesto-item__sign::after { background: var(--c-green); }
+
+@media (prefers-reduced-motion: reduce) {
+  .manifesto-item__sign,
+  .manifesto-item__sign::before,
+  .manifesto-item__sign::after { transition: none; }
+}
+
+/* Su telefono il segno toglie larghezza al titolo, e "Consulenza trasparente
+   e tutela" passava da una riga a due. Si recuperano i pixel dove non si
+   perde leggibilita': segno piu' piccolo, spazi piu' stretti, titolo al
+   minimo di progetto (16px). */
+@media (max-width: 699px) {
+  .manifesto-item__sign { width: 18px; height: 18px; }
+  .manifesto-item__sign::before { width: 8px; }
+  .manifesto-item__sign::after { height: 8px; }
+  .manifesto-item__trigger { gap: var(--space-3); padding-right: var(--space-2); }
+  .manifesto-item__title { font-size: 16px; }
+}
 
 /* Apertura senza altezze fisse: 0fr -> 1fr su una riga di grid. */
 .manifesto-item__panel {
@@ -1147,7 +1215,9 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
    ================================================================= */
 
 [data-reveal] { opacity: 0; }
-[data-reveal="mask"] .mask-line__text { transform: translateY(100%); }
+/* 100% + 0.3em: lo scarto compensa il padding aggiunto a .mask-line (0.2em) con
+   un margine, altrimenti a riposo spunterebbe la cima delle lettere. */
+[data-reveal="mask"] .mask-line__text { transform: translateY(calc(100% + 0.3em)); }
 [data-reveal="stagger"] { transform: translateY(16px); }
 [data-reveal="fade"] { transform: none; }
 [data-reveal="wipe"] { opacity: 1; }
