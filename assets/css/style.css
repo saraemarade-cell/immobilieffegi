@@ -1,0 +1,1842 @@
+/* =================================================================
+   EFFEGI — Landing "Valuta il tuo immobile"
+   Design system: tokens → reset → layout → components → motion → responsive
+   ================================================================= */
+
+/* ---------- TOKENS ---------- */
+:root {
+  /* Primary */
+  --c-anthracite: #2B3131;
+  --c-white: #FFFFFF;
+  --c-ivory: #BFBBA2;
+
+  /* Secondary */
+  --c-dark-gray: #6B6362;
+  --c-light-gray: #AAA39D;
+  --c-green: #1E4B46;
+  --c-green-light: #2E635C;
+
+  /* Functional (minimal, non-brand) */
+  --c-error: #B3261E;
+  --c-error-bg: #FBEAE8;
+  --c-focus-ring: #1E4B46;
+
+  /* Surfaces derived from primary/secondary only */
+  --c-surface: var(--c-white);
+  --c-surface-alt: #F4F3EF; /* ivory tint, off-white */
+  --c-border: #DAD7CC;
+
+  /* Typography */
+  --font-heading: 'Roboto', system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: 'Roboto', system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 140px;
+
+  /* Radius — minimo e funzionale, direzione squadrata */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+
+  /* Motion tokens */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 150ms;
+  --dur-base: 320ms;
+  --dur-slow: 520ms;
+
+  /* Layout */
+  --container-w: 1200px;
+  --header-h: 96px;
+  --gutter: 16px;
+  /* Spessore della barra di transizione fra le sezioni. Le sezioni a piena
+     altezza lo sottraggono al viewport, così la barra resta visibile
+     insieme alla sezione che introduce. */
+  --joint-h: 18px;
+  /* Altezza utile di una sezione a piena pagina: al viewport si sottraggono
+     la barra di transizione E l'header sticky, che e' opaco e coprirebbe
+     proprio la barra. Senza questa sottrazione la linea di transizione
+     finisce dietro l'header e non si vede mai insieme alla sua sezione. */
+  --section-h: calc(100dvh - var(--joint-h) - var(--header-h));
+}
+@media (min-width: 640px) {
+  :root { --gutter: 32px; --header-h: 108px; }
+}
+@media (min-width: 1280px) {
+  :root { --gutter: 48px; }
+}
+
+/* ---------- RESET ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--c-anthracite);
+  background: var(--c-white);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+input { font: inherit; color: inherit; }
+ul, ol, dl { margin: 0; padding: 0; list-style: none; }
+h1, h2, h3, p, dl, dd, blockquote, figure { margin: 0; }
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.1; }
+
+.container {
+  width: 100%;
+  max-width: var(--container-w);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--c-anthracite);
+  color: var(--c-white);
+  padding: var(--space-3) var(--space-4);
+  z-index: 1000;
+}
+.skip-link:focus { left: var(--space-3); top: var(--space-3); }
+
+:focus-visible { outline: 3px solid var(--c-focus-ring); outline-offset: 2px; }
+
+/* Ancoraggio da CTA header/finale: compensa l'header sticky */
+#form-valutazione { scroll-margin-top: calc(var(--header-h) + var(--space-4)); }
+
+/* ---------- HEADER ----------
+   Sticky con sfondo pieno (mai trasparente/sfocato: niente glassmorphism),
+   galleggia sopra la hero full-screen grazie al margin-top negativo della
+   hero stessa. Loghi grandi in header e footer. */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--c-white);
+  border-bottom: 1px solid var(--c-border);
+  min-height: var(--header-h);
+  display: flex;
+  align-items: center;
+}
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-2);
+  width: 100%;
+}
+.site-header__logo { display: flex; align-items: center; gap: var(--space-3); }
+.site-header__logo img { width: 72px; height: 72px; flex: none; }
+@media (min-width: 640px) { .site-header__logo img { width: 88px; height: 88px; } }
+.site-header__wordmark {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  color: var(--c-anthracite);
+}
+.site-header__wordmark small {
+  /* Unica eccezione alla regola "minimo 16px ovunque": è la didascalia
+     del logo (font furniture, non testo da leggere), come in qualunque
+     lockup di marchio — portarla a 16px romperebbe le proporzioni del
+     logo stesso. */
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-dark-gray);
+}
+.site-header__cta { white-space: nowrap; }
+@media (max-width: 479px) {
+  .site-header__wordmark { display: none; }
+  .site-header__logo img { width: 58px; height: 58px; }
+}
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  border: 2px solid currentColor;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  isolation: isolate;
+  transition: color var(--dur-base) var(--ease-standard);
+}
+.btn > span { position: relative; z-index: 1; }
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-standard);
+  z-index: 0;
+}
+.btn--primary { background: var(--c-anthracite); color: var(--c-white); border-color: var(--c-anthracite); }
+.btn--primary::before { background: var(--c-ivory); }
+.btn--primary:hover, .btn--primary:focus-visible { color: var(--c-anthracite); }
+.btn--primary:hover::before, .btn--primary:focus-visible::before { transform: scaleX(1); }
+
+.btn--accent { background: var(--c-green); color: var(--c-white); border-color: var(--c-green); }
+.btn--accent::before { background: var(--c-white); }
+.btn--accent:hover, .btn--accent:focus-visible { color: var(--c-green); }
+.btn--accent:hover::before, .btn--accent:focus-visible::before { transform: scaleX(1); }
+
+.btn--ghost { background: transparent; color: inherit; --btn-ghost-hover: var(--c-white); }
+.btn--ghost::before { background: currentColor; }
+.btn--ghost:hover, .btn--ghost:focus-visible { color: var(--btn-ghost-hover); }
+.btn--ghost:hover::before, .btn--ghost:focus-visible::before { transform: scaleX(1); }
+
+.btn--sm { min-height: 44px; padding: var(--space-2) var(--space-4); font-size: 16px; }
+/* Il padding generoso della CTA grande non puo. essere fisso: a 96px per
+   lato il bottone era piu. largo di un telefono stretto e usciva dallo
+   schermo. Cresce con lo spazio disponibile, senza mai superarlo. */
+.btn--lg {
+  min-height: 58px;
+  padding: var(--space-4) clamp(var(--space-5), 8vw, var(--space-9));
+  font-size: 16px;
+  max-width: 100%;
+}
+.btn--block { width: 100%; }
+.btn[disabled] { opacity: 0.5; pointer-events: none; }
+
+.btn--loading > span { visibility: hidden; }
+.btn--loading::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin 700ms linear infinite;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* ---------- TYPOGRAPHY HELPERS ---------- */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-green);
+  margin-bottom: var(--space-3);
+}
+
+.section-head { margin: 0 0 var(--space-7); }
+.section-head .mask-line__text {
+  font-size: clamp(30px, 4.4vw, 46px);
+  font-weight: 700;
+  color: var(--c-anthracite);
+}
+.text-accent { color: var(--c-green); font-style: italic; }
+
+/* Underline reveal — piccolo blocco verde che cresce sotto il testo */
+[data-reveal="underline"] {
+  position: relative;
+  display: inline-block;
+  color: var(--c-anthracite);
+  font-weight: 700;
+}
+[data-reveal="underline"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 3px;
+  background: var(--c-green);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.is-visible[data-reveal="underline"]::after {
+  transition: transform var(--dur-slow) var(--ease-standard) 120ms;
+  transform: scaleX(1);
+}
+h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: var(--space-3); padding-bottom: var(--space-2); }
+
+/* Numero in quadrato — componente riutilizzato in tutte le liste numerate */
+.num-square {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--c-green);
+  background: transparent;
+  border: 2px solid var(--c-green);
+}
+.num-square--dark { background: var(--c-anthracite); color: var(--c-white); border-color: var(--c-anthracite); }
+.num-square--light { background: var(--c-ivory); color: var(--c-anthracite); border-color: var(--c-ivory); }
+
+/* Elemento geometrico di transizione tra sezioni — barra spessa che
+   taglia il confine tra due sezioni. Lavora insieme alle "liniette"
+   laterali (l'accento verticale di [data-reveal-block]) come un'unica
+   composizione coreografata: la barra scorre da un lato, la linietta
+   della sezione che segue nasce dallo stesso lato — poi il lato si
+   alterna alla transizione successiva, per un movimento logico lungo
+   la pagina invece di restare sempre a sinistra. */
+.section-joint {
+  /* Arrivando da un link interno la barra deve restare sotto l'header. */
+  scroll-margin-top: var(--header-h);
+  display: block;
+  width: 100%;
+  /* --joint-h è nei token: le sezioni a piena altezza sottraggono questo
+     valore, così la barra di transizione e la sezione che introduce stanno
+     dentro lo stesso viewport invece di spingersi a vicenda fuori campo. */
+  height: var(--joint-h);
+  position: relative;
+  z-index: 2;
+}
+.section-joint--ivory { background: var(--c-ivory); }
+.section-joint--green { background: var(--c-green); }
+.section-joint--anthracite { background: var(--c-anthracite); }
+
+/* ---------- HERO ----------
+   Fotografia full-screen (100dvh). Il form (con titolo e testo) vive in
+   un unico pannello centrale grande, in vetro — non un vetro piatto, ma
+   una vera "lente d'ingrandimento": dietro al vetro si vede la stessa
+   fotografia della hero, ingrandita e sfocata, che si mette a fuoco con
+   una breve animazione al reveal. Deroga consapevole e voluta al
+   principio generale "niente glassmorphism" — richiesta esplicitamente.
+   Form = raccolta lead standard: nessuna cornice a step, nessun testo
+   messo in evidenza a blocchi — solo l'eyebrow "Valutazione immobiliare
+   gratuita". */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-top: calc(-1 * var(--header-h));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--c-anthracite);
+}
+.hero__bg { position: absolute; inset: 0; z-index: 0; }
+.hero__bg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero__bg-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20,23,23,0.3) 0%, rgba(20,23,23,0.1) 35%, rgba(20,23,23,0.45) 100%);
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  /* Su schermi piccoli lo spazio verticale è tutto per headline + form:
+     il padding sopra tiene solo la distanza minima dall'header sticky. */
+  /* --lens-y e. la sporgenza verticale della lente: il padding in fondo non
+     puo. essere minore, altrimenti la cornice viene tagliata dal bordo
+     della hero (succedeva in orizzontale su telefono). */
+  --lens-y: 20px;
+  /* Sopra e sotto lo stesso margine, cosi. la cornice della lente risulta
+     centrata nella parte di hero effettivamente visibile. Sopra si aggiunge
+     l.altezza dell.header, che essendo sticky e opaco copre quella fascia:
+     senza questa simmetria restavano 196px sopra e 108 sotto. */
+  --hero-pad: max(var(--space-4), calc(var(--lens-y) + var(--space-2)));
+  padding-top: calc(var(--header-h) + var(--hero-pad));
+  padding-bottom: var(--hero-pad);
+  display: flex;
+  justify-content: center;
+}
+@media (min-width: 900px) {
+  /* Su desktop il respiro cresce, ma resta lo STESSO sopra e sotto: la
+     regola precedente usava 32 sopra e 48 sotto e rompeva la simmetria
+     della cornice, che finiva 4px dietro l.header. */
+  .hero__inner { --hero-pad: max(var(--space-7), calc(var(--lens-y) + var(--space-3))); }
+}
+
+/* Fascia avorio: sul pannello bianco della hero il fondo bianco spariva.
+   Non verde e non antracite, che sono i colori delle CTA: l.avorio e. il
+   terzo colore primario del marchio e non si confonde con un pulsante. */
+.eyebrow--band { background: var(--c-ivory); color: var(--c-anthracite); padding: var(--space-1) var(--space-3); margin-bottom: var(--space-3); }
+@media (min-width: 560px) { .eyebrow--band { padding: var(--space-2) var(--space-4); margin-bottom: var(--space-4); } }
+.eyebrow--on-dark { color: var(--c-ivory); }
+
+/* Contenitore che tiene insieme i due blocchi geometrici sfalsati:
+   la lente (dietro, più grande) e il form (davanti, sopra di essa). */
+/* La larghezza del form NON è un valore fisso: è ricavata dallo spazio che
+   la lente ha bisogno di occupare ai suoi lati. --lens-x è la sporgenza
+   orizzontale della lente, --lens-breath il respiro minimo che deve restare
+   tra la lente e il bordo del viewport (comprende anche la larghezza della
+   scrollbar). Così il form si
+   stringe da solo quando serve e la lente non tocca mai le estremità. */
+.hero__lens-wrap {
+  /* Su mobile la sporgenza sta dentro il gutter e il margine resta 0: ogni
+     px tolto al form lo fa crescere in altezza e spinge la CTA sotto la
+     piega, e la lente non si muove: non serve margine extra. */
+  --lens-x: 12px;
+  --lens-breath: 4px;
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  /* La lente sporge di --lens-x oltre il form: il gutter del container ne
+     assorbe una parte, il resto (più il respiro richiesto) lo aggiungiamo
+     come margine del form. Così la distanza tra lente e bordo del viewport
+     è esattamente --lens-breath a qualsiasi larghezza, senza dipendere da
+     100vw (che include la scrollbar) né da percentuali. */
+  margin-inline: max(0px, calc(var(--lens-x) + var(--lens-breath) - var(--gutter)));
+}
+@media (min-width: 640px) { .hero__lens-wrap { --lens-x: 56px; --lens-breath: 16px; } }
+/* La sporgenza cresce per fascia: spinta troppo presto strozzerebbe il
+   form, che diventando più stretto si allunga e rifarebbe la lente
+   verticale — l'opposto di quel che serve. */
+@media (min-width: 900px) { .hero__lens-wrap { --lens-x: 110px; --lens-breath: 44px; } }
+@media (min-width: 1200px) { .hero__lens-wrap { --lens-x: 200px; } }
+@media (min-width: 1400px) { .hero__lens-wrap { --lens-x: 260px; } }
+
+/* Lo strato "lente" — un riquadro PIÙ GRANDE del form, dietro di esso:
+   nella cornice che resta visibile tutt'intorno si vede la stessa
+   porzione di sfondo che sta dietro la lente, ma ingrandita. Non è un
+   bagliore e non è una sfocatura decorativa: è un vero ingrandimento
+   otticamente allineato — background-size e background-position sono
+   calcolati da main.js (initHeroLens) in base alla posizione della
+   lente nella hero e al ritaglio dell'immagine di sfondo (object-fit:
+   cover). Il bordo netto definisce il vetro senza aloni. */
+.lens-layer {
+  position: absolute;
+  /* Cornice ampia: è la parte in cui si vede lo sfondo ingrandito, quindi
+     deve avere spessore sufficiente a leggersi come lente. La sporgenza
+     orizzontale è la stessa --lens-x da cui .hero__lens-wrap ricava la
+     propria larghezza: i due valori non possono divergere. */
+  /* Riquadro nettamente orizzontale: sporge molto ai lati e poco sopra e
+     sotto, così legge come una lente larga e non come una cornice attorno
+     al form. La sporgenza verticale resta contenuta anche perché la hero
+     deve stare in un viewport. */
+  inset: calc(-1 * var(--lens-y)) calc(-1 * var(--lens-x));
+  z-index: 0;
+  pointer-events: none;
+  /* Deve restare la STESSA immagine di .hero__bg img, e LENS_IMG_W/H in
+     main.js devono corrispondere alle sue dimensioni naturali (2000x1331),
+     altrimenti l'allineamento ottico della lente salta. */
+  background-image: url("../img/stock/residential-facade.jpg");
+  background-repeat: no-repeat;
+  border: 2px solid rgba(255, 255, 255, 0.75);
+}
+@media (min-width: 640px) { .hero__inner { --lens-y: 28px; } }
+@media (min-width: 900px) { .hero__inner { --lens-y: 36px; } }
+
+/* Il form — blocco separato, sopra la lente, con superficie propria
+   (quasi opaca: deve restare perfettamente leggibile). */
+.hero__panel--glass {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--c-border);
+  padding: var(--space-5);
+  text-align: left;
+}
+@media (min-width: 560px) { .hero__panel--glass { padding: var(--space-8) var(--space-7); } }
+
+.hero__panel-content { position: relative; z-index: 1; }
+
+.hero__title { font-size: clamp(27px, 5.4vw, 52px); line-height: 1.12; letter-spacing: -0.01em; color: var(--c-anthracite); margin-bottom: var(--space-3); }
+.mask-line { display: block; overflow: hidden; }
+.mask-line__text { display: block; will-change: transform; }
+
+.hero__lead { font-size: 16px; color: var(--c-dark-gray); margin-bottom: var(--space-3); }
+
+/* ---------- FORM CARD ----------
+   Form standard di raccolta lead: niente indicatori di progresso, niente
+   linguaggio "step/passo". Solo campi, CTA, feedback. */
+.form-card { position: relative; width: 100%; }
+.form-card__title { font-size: clamp(19px, 2.6vw, 23px); margin-bottom: var(--space-3); }
+.form-card__legal { font-size: 16px; color: var(--c-light-gray); margin-top: var(--space-3); text-align: center; }
+.form-card__note {
+  font-size: 16px;
+  color: var(--c-dark-gray);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  background: var(--c-surface-alt);
+}
+
+.field { margin-bottom: var(--space-3); }
+.field label { display: block; font-size: 16px; font-weight: 700; margin-bottom: var(--space-2); color: var(--c-anthracite); }
+/* La checkbox del consenso e. esclusa: con le misure di un campo di testo
+   diventava alta 52px e spingeva l.etichetta sotto al quadratino invece di
+   tenerla sulla stessa riga. */
+.field input:not([type="checkbox"]) {
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-white);
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  transition: border-color var(--dur-fast) var(--ease-standard), background var(--dur-fast) var(--ease-standard);
+}
+.field input:not([type="checkbox"])::placeholder { color: var(--c-light-gray); }
+.field input:not([type="checkbox"]):hover { border-color: var(--c-dark-gray); }
+.field input:not([type="checkbox"]):focus { border-color: var(--c-green); border-width: 2px; outline: none; background: var(--c-surface-alt); }
+.field input:focus-visible { outline: 3px solid var(--c-focus-ring); outline-offset: 1px; }
+.field.has-error input { border-color: var(--c-error); background: var(--c-error-bg); }
+.field__error { display: none; font-size: 16px; color: var(--c-error); margin-top: var(--space-2); }
+.field.has-error .field__error { display: block; }
+
+.field-row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 0 var(--space-2); }
+@media (min-width: 420px) { .field-row { gap: 0 var(--space-3); } }
+
+.valuation-step[hidden] { display: none; }
+
+.valuation-recap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--c-surface-alt);
+}
+.valuation-recap dt { font-size: 16px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--c-dark-gray); margin-bottom: var(--space-1); }
+.valuation-recap dd { font-weight: 700; font-size: 16px; color: var(--c-anthracite); word-break: break-word; }
+
+.live-form-mount { border: 1px solid var(--c-border); min-height: 320px; margin-bottom: var(--space-4); position: relative; background: var(--c-white); }
+.live-form-mount iframe { width: 100%; min-height: 640px; border: 0; display: block; }
+.live-form-mount__skeleton { padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
+.skeleton-line {
+  height: 14px;
+  background: linear-gradient(90deg, var(--c-surface-alt) 25%, var(--c-border) 50%, var(--c-surface-alt) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.valuation-step__back { display: block; margin-inline: auto; }
+
+/* ---------- MANIFESTO ("Perché scegliere Effegi") ---------- */
+.manifesto {
+  display: grid;
+  /* minmax(0,1fr) e non 1fr: il minimo "auto" di 1fr e. il min-content dei
+     figli, che su schermi stretti allargava la traccia oltre il viewport. */
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--c-white);
+}
+@media (min-width: 960px) {
+  .manifesto { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
+}
+.manifesto__visual { position: relative; overflow: hidden; background: var(--c-surface-alt); aspect-ratio: 16 / 9; }
+@media (min-width: 960px) { .manifesto__visual { aspect-ratio: auto; order: 2; } }
+
+/* Le tre immagini sono impilate: quella attiva viene scoperta da una
+   tendina rettangolare verticale (clip-path), coerente con il linguaggio
+   a blocchi del resto della pagina. Nessuna dissolvenza morbida. */
+.manifesto__visual-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path var(--dur-slow) var(--ease-out);
+}
+.manifesto__visual-img.is-active { clip-path: inset(0 0 0 0); }
+
+.manifesto__visual-tag {
+  position: absolute;
+  left: 0;
+  bottom: var(--space-5);
+  z-index: 2;
+  background: var(--c-green);
+  color: var(--c-white);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: var(--space-2) var(--space-4);
+  max-width: calc(100% - var(--space-6));
+}
+
+.manifesto__content { padding: var(--space-5) var(--gutter); display: flex; flex-direction: column; justify-content: center; }
+@media (min-width: 960px) {
+  .manifesto__content {
+    order: 1;
+    padding: var(--space-6) var(--space-7) var(--space-6) max(var(--gutter), calc((100vw - var(--container-w)) / 2 + var(--gutter)));
+  }
+}
+/* Ritmo verticale compatto: la sezione deve stare in un viewport MENO lo
+   spessore della barra di transizione, che va vista insieme alla sezione
+   che introduce. Lo spazio si toglie dalle distanze, mai dal testo. */
+.manifesto .section-head { margin-bottom: var(--space-4); }
+
+.manifesto__lead {
+  font-size: 16px;
+  color: var(--c-dark-gray);
+  max-width: 54ch;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--c-border);
+  line-height: 1.45;
+}
+.manifesto__lead strong { color: var(--c-anthracite); font-weight: 700; }
+
+/* Accordion dei tre differenzianti. Il punto attivo è marcato da una
+   barra verde piena sul lato sinistro — nessun bordo arrotondato, nessuna
+   icona a freccia: solo blocchi. */
+.manifesto-list { display: flex; flex-direction: column; max-width: 52ch; }
+.manifesto-item {
+  border-bottom: 1px solid var(--c-border);
+  position: relative;
+  transition: background var(--dur-base) var(--ease-standard);
+}
+.manifesto-item:first-child { border-top: 1px solid var(--c-border); }
+.manifesto-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--c-green);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.manifesto-item.is-active::before { transform: scaleY(1); }
+.manifesto-item.is-active { background: var(--c-surface-alt); }
+
+.manifesto-item__head { margin: 0; }
+.manifesto-item__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--c-anthracite);
+}
+.manifesto-item__title { font-family: var(--font-heading); font-weight: 700; font-size: 17px; }
+.manifesto-item__trigger:hover .manifesto-item__title { color: var(--c-green); }
+
+/* Apertura senza altezze fisse: 0fr -> 1fr su una riga di grid. */
+.manifesto-item__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dur-base) var(--ease-out);
+}
+.manifesto-item.is-active .manifesto-item__panel { grid-template-rows: 1fr; }
+.manifesto-item__panel > p {
+  overflow: hidden;
+  font-size: 16px;
+  color: var(--c-dark-gray);
+  line-height: 1.45;
+  padding-inline: var(--space-4) var(--space-4);
+}
+.manifesto-item.is-active .manifesto-item__panel > p { padding-bottom: var(--space-3); }
+
+/* Tag dei servizi inclusi. Erano riquadri maiuscoli pieni che pesavano
+   quanto i titoli: qui restano 16px (minimo di progetto) ma perdono il
+   maiuscolo e il bordo su tutti i lati, ridotti a una riga di voci separate
+   da un trattino verde verticale. Sono un dettaglio, non un livello di
+   gerarchia in più. */
+.manifesto-usp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  margin-top: var(--space-3);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--c-border);
+  max-width: 52ch;
+}
+.manifesto-usp li {
+  position: relative;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--c-dark-gray);
+  padding-left: var(--space-3);
+}
+.manifesto-usp li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 8px;
+  height: 2px;
+  background: var(--c-green);
+}
+
+/* Schermi bassi (portatili 13"/14" a 1280x620-720): il ritmo verticale si
+   stringe ancora, così la sezione e la sua barra di transizione continuano
+   a stare insieme in un viewport. Si agisce solo sulle distanze. */
+@media (min-width: 960px) and (max-height: 760px) {
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-4); }
+  .manifesto .section-head,
+  .process-section .section-head { margin-bottom: var(--space-3); }
+  .manifesto__lead { margin-bottom: var(--space-2); padding-bottom: var(--space-2); }
+  .manifesto-item__trigger { padding-block: 6px; }
+  .manifesto-usp { margin-top: var(--space-2); }
+  .process-step { padding-block: var(--space-2); }
+}
+
+/* ---------- PROCESS SECTION ("Come funziona") ----------
+   Sfondo chiaro (ivory-tint): un quadrato verde/antracite su sfondo
+   antracite risultava a basso contrasto — corretto passando a superficie
+   chiara con quadrati pieni antracite (alto contrasto). */
+.process-section {
+  display: grid;
+  /* minmax(0,1fr) e non 1fr: il minimo "auto" di 1fr e. il min-content dei
+     figli, che su schermi stretti allargava la traccia oltre il viewport. */
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--c-white);
+  color: var(--c-anthracite);
+}
+@media (min-width: 960px) {
+  .process-section { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); align-items: stretch; }
+}
+
+.process-section__content { padding: var(--space-6) var(--gutter); display: flex; flex-direction: column; justify-content: center; }
+@media (min-width: 960px) {
+  .process-section__content {
+    padding: var(--space-6) var(--space-7) var(--space-6) max(var(--gutter), calc((100vw - var(--container-w)) / 2 + var(--gutter)));
+  }
+}
+.process-section .section-head { margin-bottom: var(--space-5); }
+/* Stesso trattamento di "Perche. scegliere Effegi": su mobile l.immagine
+   sta SOPRA il testo (order: -1, perche. nel markup viene dopo) e ha le
+   stesse proporzioni 16:9. Prima era sotto e in 4:3, quindi le due sezioni
+   si comportavano in modo diverso a parita. di struttura. */
+.process-section__visual { position: relative; overflow: hidden; aspect-ratio: 16 / 9; order: -1; }
+@media (min-width: 960px) { .process-section__visual { aspect-ratio: auto; order: 0; } }
+.process-section__visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Stepper percorribile: ogni passo ha il proprio binario verticale che si
+   riempie di verde quando il passo è raggiunto. Il passo attivo alza il
+   contrasto del testo, gli altri restano leggibili ma arretrati. */
+.process-list { display: flex; flex-direction: column; max-width: 52ch; }
+.process-step {
+  position: relative;
+  padding-left: var(--space-5);
+  padding-block: var(--space-3);
+  border-bottom: 1px solid var(--c-border);
+}
+.process-step:first-child { border-top: 1px solid var(--c-border); }
+
+.process-step__rail { position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c-border); }
+.process-step__rail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--c-green);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+/* Il binario resta pieno anche sui passi già superati: è avanzamento,
+   non semplice evidenziazione del passo corrente. */
+.process-step.is-reached .process-step__rail::after { transform: scaleY(1); }
+
+.process-step__head { margin: 0; }
+.process-step__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--c-anthracite);
+}
+.process-step .num-square {
+  width: 56px;
+  height: 56px;
+  font-size: 18px;
+  flex: 0 0 auto;
+  transition: background var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard);
+}
+.process-step__title { font-family: var(--font-heading); font-weight: 700; font-size: 18px; }
+.process-step__trigger:hover .process-step__title { color: var(--c-green); }
+.process-step__text {
+  font-size: 16px;
+  color: var(--c-dark-gray);
+  line-height: 1.4;
+  margin-top: var(--space-2);
+  padding-left: calc(56px + var(--space-4));
+  opacity: 0.75;
+  transition: opacity var(--dur-base) var(--ease-standard);
+}
+.process-step.is-active .process-step__text { opacity: 1; }
+.process-step.is-active .num-square { background: var(--c-green); color: var(--c-white); }
+
+/* Un'immagine per passo, impilate: la nuova entra con la stessa tendina
+   rettangolare usata nel manifesto. */
+.process-section__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path var(--dur-slow) var(--ease-out);
+}
+.process-section__img.is-active { clip-path: inset(0 0 0 0); }
+.process-section__marker {
+  position: absolute;
+  right: 0;
+  top: var(--space-5);
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  background: var(--c-anthracite);
+  color: var(--c-white);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 24px;
+  line-height: 1;
+  padding: var(--space-3) var(--space-4);
+}
+.process-section__marker-of { font-size: 16px; color: var(--c-light-gray); font-weight: 700; }
+
+/* ---------- RECENSIONI / REVIEWS ----------
+   Sezione anthracite, ricca: colonna statistiche + griglia video reali. */
+/* Altezza esatta di un viewport: l'intestazione e i numeri prendono lo
+   spazio necessario, i video il resto. `overflow: hidden` è la garanzia che
+   nulla esca dal viewport se il testo va a capo su schermi stretti. */
+.reviews-section {
+  /* Stesso respiro delle altre sezioni sopra il titolo (64px): con solo
+     16px il blocco partiva incollato alla barra di transizione. Lo spazio
+     lo cede il player, che resta comunque in 16:9. */
+  padding-block: var(--space-6) var(--space-4);
+  background: var(--c-anthracite);
+  color: var(--c-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Nessun overflow:hidden e nessuna altezza fissa: con un viewport basso
+     (telefono in orizzontale, forte zoom) tagliavano davvero il contenuto,
+     fino a 171px spariti e il player ridotto a 2px. Meglio una sezione che
+     cresce di una schermata che del contenuto perso. */
+}
+
+/* Una schermata per sezione solo dove ci sta: sotto questa soglia il
+   contenuto scorre normalmente invece di essere compresso o tagliato. */
+@media (min-width: 700px) and (min-height: 600px) {
+  .reviews-section { min-height: var(--section-h); }
+}
+.reviews-section .section-head .mask-line__text { color: var(--c-white); }
+/* Titolo e occhiello stanno stretti: qui l'altezza va data ai video. */
+.reviews-section .section-head { margin-bottom: var(--space-3); }
+@media (min-width: 700px) { .reviews-section .section-head { margin-bottom: var(--space-5); } }
+.reviews-section__head { margin-bottom: var(--space-4); }
+.reviews-section__lead { font-size: 16px; color: var(--c-light-gray); max-width: 56ch; }
+@media (min-width: 700px) {
+  .reviews-section__head { margin-bottom: var(--space-5); }
+  .reviews-section__lead { font-size: 17px; }
+}
+
+/* Testo e statistiche occupano lo spazio che serve, i video si prendono
+   tutto il resto: la sezione sta esattamente in un viewport e i video sono
+   la parte che pesa di più. */
+.reviews-section__top { flex: 0 0 auto; padding-bottom: var(--space-5); }
+
+/* Su mobile numero e didascalia stanno sulla stessa riga: impilati
+   verticalmente le tre statistiche mangiavano l'altezza che deve andare ai
+   video. Da 700px in su tornano a colonna, affiancate. */
+.stats-col { display: flex; flex-direction: column; gap: var(--space-3); }
+/* Numero e didascalia si allineano al centro, non alla linea di base: le
+   didascalie vanno da una a due righe e con la baseline quelle su due righe
+   scendevano sotto il numero, facendo sembrare le tre voci disallineate. */
+.stat { display: flex; align-items: center; gap: var(--space-3); }
+.stat__num {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: clamp(34px, 9vw, 44px);
+  color: var(--c-ivory);
+  line-height: 1;
+  flex: 0 0 auto;
+  /* 2.6em riservava 88px al numero, che ne usa una sessantina: la larghezza
+     avanzata serve alla didascalia accanto, che su telefono era cosi. stretta
+     da spezzarsi lasciando parole isolate. Basta ad allineare "40+", "67%"
+     e "98%" fra loro. */
+  min-width: 2.1em;
+}
+.stat__label { font-size: 16px; color: var(--c-light-gray); line-height: 1.3; }
+@media (min-width: 700px) {
+  .stats-col { flex-direction: row; flex-wrap: wrap; gap: var(--space-4) var(--space-8); }
+  .stat { flex-direction: column; align-items: flex-start; gap: var(--space-2); flex: 1 1 200px; }
+  .stat__num { font-size: clamp(44px, 5.5vw, 64px); min-width: 0; }
+  /* Niente limite a 28ch: la colonna della statistica e. gia. il vincolo, e
+     quel tetto lasciava ~95px vuoti costringendo il testo a spezzarsi male. */
+  .stat__label { line-height: 1.35; }
+}
+
+/* Un player grande + rail di miniature. Il player NON viene piu.
+   stirato a tutta larghezza: con l.altezza limitata dal viewport ne usciva
+   un rettangolo lunghissimo e basso, e il video ci finiva dentro piccolo,
+   con bande ai lati. Ora tiene il 16:9, prende tutta l.altezza disponibile
+   e la larghezza segue: il video e. grande quanto lo spazio consente. */
+.video-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  max-width: var(--container-w);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: var(--space-3);
+}
+/* max-width in CSS: la larghezza del player la calcola il JS in px, e
+   durante un ridimensionamento (o una rotazione) il valore vecchio resta
+   applicato per qualche frame. Senza questo limite in quei frame sporgeva
+   dal viewport. */
+.video-card--stage { height: 100%; width: 100%; max-width: 100%; aspect-ratio: auto; border-inline: 1px solid rgba(255, 255, 255, 0.18); }
+
+/* Su desktop il blocco diventa flex: il contenitore ha altezza definita,
+   quindi height:100% sul player si risolve e la larghezza la ricava dal
+   16:9. In griglia con colonne "auto" il calcolo va in circolo e il player
+   collassa. */
+@media (min-width: 860px) {
+  .video-stage {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: var(--space-3);
+  }
+  /* La larghezza del player viene calcolata in JS (sizeVideoStage in
+     main.js) a partire dall.altezza realmente disponibile, per tenere il
+     16:9: in CSS puro il valore va in circolo con l.altezza del flex. */
+  /* Larghezza e altezza le impone sizeVideoStage() in JS. */
+  .video-card--stage { flex: 0 0 auto; aspect-ratio: auto; }
+  .video-rail { flex: 0 0 auto; width: clamp(150px, 14vw, 200px); }
+}
+
+.video-rail { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+@media (min-width: 860px) {
+  /* La colonna segue la larghezza del rail (minmax(0,1fr)): con un clamp
+     diverso da quello della width le miniature sporgevano di qualche px. */
+  .video-rail { grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+  .video-thumb { height: 100%; }
+}
+
+.video-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  padding: 0;
+  background: var(--c-anthracite);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity var(--dur-base) var(--ease-standard), border-color var(--dur-base) var(--ease-standard);
+}
+.video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.video-thumb:hover, .video-thumb:focus-visible { opacity: 0.85; }
+.video-thumb.is-active { opacity: 1; border-color: var(--c-green); }
+/* Barra verde piena sul lato: marca la miniatura in riproduzione senza
+   affidarsi al solo colore del bordo. */
+.video-thumb.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 5px;
+  background: var(--c-green);
+}
+.video-thumb__n {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--c-anthracite);
+  color: var(--c-white);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  padding: 6px 8px;
+}
+
+.video-card { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: var(--c-anthracite); padding: 0; text-align: left; border: 1px solid rgba(255,255,255,0.18); cursor: pointer; }
+.video-card img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-base) var(--ease-standard); }
+.video-card:hover img, .video-card:focus-visible img { transform: scale(1.05); }
+.video-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(43,49,49,0.92), rgba(43,49,49,0) 50%); }
+/* Il quadrato di play si adatta all'altezza disponibile: su schermi bassi
+   un blocco da 72px finirebbe sotto l'etichetta. */
+.video-card__play {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
+  background: var(--c-white); color: var(--c-green); font-size: 20px; z-index: 1;
+}
+@media (min-width: 700px) { .video-card__play { width: 72px; height: 72px; font-size: 22px; } }
+.video-card__label { position: absolute; left: var(--space-3); bottom: var(--space-3); z-index: 1; color: var(--c-white); font-size: 16px; font-weight: 700; }
+@media (min-width: 700px) { .video-card__label { left: var(--space-4); bottom: var(--space-4); } }
+.video-card__frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; z-index: 2; }
+
+/* ---------- SOCIAL ----------
+   Non a piena altezza: sezione di chiusura leggera, non deve competere
+   con hero/manifesto/come funziona/recensioni. */
+/* 64px come pacchetto, recensioni e contatti: stesso respiro sopra il
+   titolo in tutte le sezioni non a piena altezza. */
+.social-section { padding-block: var(--space-8); background: var(--c-white); }
+/* Stesso ritmo delle altre sezioni: titolo -> 16px -> paragrafo -> 32px
+   (il margine del feed) -> contenuto. Prima il paragrafo aveva 64px sotto
+   piu. i 32 del feed, quasi 100px di stacco contro i 32 di "Un pacchetto
+   completo" e "Vendi la tua casa"; e un margine negativo in cima per
+   recuperare il margine del titolo, che ora non serve piu.. */
+.social-section .section-head { margin-bottom: var(--space-4); }
+.social-section__lead { font-size: 17px; color: var(--c-dark-gray); max-width: 60ch; margin-top: 0; margin-bottom: 0; }
+
+/* Feed Instagram — griglia di embed ufficiali. Le card di Instagram hanno
+   un'altezza propria che non possiamo controllare da fuori: l'altezza del
+   riquadro è fissata qui e l'eccedenza viene tagliata, così la griglia
+   resta regolare e la sezione non si allunga a dismisura. */
+/* Su mobile i post scorrono in orizzontale con lo snap: impilati sarebbero
+   un muro di quasi 3000px in mezzo a una landing da conversione. Da 640px
+   in su tornano una griglia. */
+.ig-feed {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 86%;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  /* Lo scorrimento arriva fino ai bordi dello schermo, non si ferma al
+     gutter: si capisce che c'è altro oltre il margine. */
+  margin-inline: calc(-1 * var(--gutter));
+  padding-inline: var(--gutter);
+  padding-bottom: var(--space-2);
+}
+@media (min-width: 640px) {
+  .ig-feed {
+    grid-auto-flow: row;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    overflow-x: visible;
+    margin-inline: 0;
+    padding-inline: 0;
+  }
+}
+@media (min-width: 960px) { .ig-feed { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ig-feed__item {
+  position: relative;
+  height: 440px;
+  overflow: hidden;
+  border: 1px solid var(--c-border);
+  background: var(--c-surface-alt);
+  scroll-snap-align: start;
+}
+@media (min-width: 640px) { .ig-feed__item { height: 480px; } }
+.ig-feed__item iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+/* ---------- CTA FINALE + QUOTE ----------
+   Superficie chiara, non antracite: la sezione Recensioni appena sopra
+   è già scura — due sezioni scure di fila creavano un accostamento
+   piatto e il verde del bottone perdeva forza su fondo scuro. Non a
+   piena altezza: chiusura compatta, non deve competere con le sezioni
+   principali. */
+.final-cta {
+  padding-block: var(--space-9);
+  background: var(--c-surface-alt);
+  color: var(--c-anthracite);
+  text-align: center;
+}
+.final-cta__inner { display: flex; flex-direction: column; align-items: center; gap: var(--space-6); margin-inline: auto; }
+.final-cta__quote p {
+  font-size: clamp(22px, 3.2vw, 32px);
+  font-weight: 500;
+  font-style: italic;
+  color: var(--c-green);
+  max-width: 32ch;
+}
+.final-cta__title .mask-line__text { font-size: clamp(30px, 5vw, 50px); color: var(--c-anthracite); }
+
+/* ---------- FOOTER ----------
+   Logo grande con contorno netto (senza il bordo si perdeva contro lo
+   sfondo antracite, praticamente dello stesso colore del logo), colonne
+   di navigazione reali, più compatto. */
+.site-footer { position: relative; background: var(--c-anthracite); color: var(--c-ivory); padding-block: var(--space-7) var(--space-5); }
+
+.site-footer__top { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid rgba(255,255,255,0.14); }
+@media (min-width: 700px) { .site-footer__top { flex-direction: row; align-items: center; justify-content: space-between; } }
+.site-footer__brand { display: block; flex: none; border: 1px solid rgba(255,255,255,0.3); line-height: 0; }
+/* Il limite di larghezza toglieva righe di spazio utile: a 40ch (e poi a
+   62ch) il testo sotto il logo andava a capo anche dove il footer aveva
+   ancora margine. Ora usa tutto lo spazio accanto al logo, con un tetto
+   solo sui monitor molto larghi per non superare la lunghezza di riga
+   leggibile. */
+.site-footer__tagline { font-size: 16px; color: var(--c-white); max-width: 78ch; font-weight: 500; line-height: 1.45; }
+
+.site-footer__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); margin-bottom: var(--space-6); }
+@media (min-width: 640px) { .site-footer__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.site-footer__col { display: flex; flex-direction: column; gap: var(--space-3); }
+.site-footer__col h3 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--c-white);
+  margin-bottom: var(--space-1);
+}
+.site-footer__col-spacer { margin-top: var(--space-3); }
+.site-footer__col > a { color: var(--c-ivory); font-size: 16px; transition: color var(--dur-fast) var(--ease-standard); }
+.site-footer__col > a:hover { color: var(--c-white); }
+.site-footer__office { display: flex; flex-direction: column; gap: 2px; margin-bottom: var(--space-2); }
+.site-footer__office strong { color: var(--c-white); font-size: 16px; margin-bottom: 2px; }
+.site-footer__office a { color: var(--c-ivory); font-size: 16px; }
+.site-footer__office a:hover { color: var(--c-white); }
+.site-footer__address { color: var(--c-light-gray); font-size: 16px; }
+
+.site-footer__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid rgba(255,255,255,0.14);
+  font-size: 13px;
+  color: var(--c-light-gray);
+}
+
+/* =================================================================
+   MOTION SYSTEM
+   Rettangoli, wipe, stagger, underline — grammatica coerente col
+   motion reference del brand.
+   ================================================================= */
+
+[data-reveal] { opacity: 0; }
+[data-reveal="mask"] .mask-line__text { transform: translateY(100%); }
+[data-reveal="stagger"] { transform: translateY(16px); }
+[data-reveal="fade"] { transform: none; }
+[data-reveal="wipe"] { opacity: 1; }
+[data-reveal="underline"] { opacity: 1; }
+
+.is-visible[data-reveal="mask"] { opacity: 1; }
+.is-visible[data-reveal="mask"] .mask-line__text {
+  transform: translateY(0);
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+.is-visible[data-reveal="stagger"] {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.is-visible[data-reveal="fade"] { opacity: 1; transition: opacity var(--dur-base) var(--ease-standard); }
+
+/* Wipe mask — rettangolo che attraversa l'elemento per il reveal (immagini) */
+[data-reveal="wipe"] { position: relative; overflow: clip; }
+[data-reveal="wipe"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--c-anthracite);
+  transform-origin: right;
+  transform: scaleX(0);
+  z-index: 2;
+  pointer-events: none;
+}
+[data-reveal="wipe"].is-visible::after { animation: wipe-sweep var(--dur-slow) var(--ease-standard) forwards; }
+@keyframes wipe-sweep {
+  0%   { transform-origin: left; transform: scaleX(0); }
+  50%  { transform-origin: left; transform: scaleX(1); }
+  50.001% { transform-origin: right; transform: scaleX(1); }
+  100% { transform-origin: right; transform: scaleX(0); }
+}
+
+/* Section joint — piccolo rettangolo che entra a comparsa tra le sezioni */
+.section-joint { transform: scaleX(0); transition: transform var(--dur-slow) var(--ease-standard); }
+/* Il verso e' dichiarato nel markup, non dedotto dalla posizione: cosi'
+   l'immagine della sezione sottostante puo' muoversi nello stesso verso
+   della barra che la introduce. */
+.section-joint--from-left { transform-origin: left; }
+.section-joint--from-right { transform-origin: right; }
+.section-joint.is-visible { transform: scaleX(1); }
+
+/* Section block accents — "liniette" verticali che nascono dal bordo.
+   Si alternano sinistra/destra da una sezione all'altra (non sempre a
+   sinistra), in coerenza con il verso della barra di transizione che
+   le precede: manifesto←sx, come funziona→dx, recensioni←sx, cta→dx. */
+[data-reveal-block] { position: relative; }
+[data-reveal-block]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 80px;
+  background: var(--c-ivory);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform var(--dur-slow) var(--ease-standard);
+  z-index: 3;
+}
+[data-reveal-block].is-visible::before { transform: scaleY(1); }
+/* Il lato della linietta segue il verso della barra che introduce la
+   sezione: barra da destra -> linietta a destra, e viceversa. */
+.process-section[data-reveal-block]::before,
+.social-section[data-reveal-block]::before { left: auto; right: 0; }
+.final-cta[data-reveal-block]::before { background: var(--c-green); left: 0; right: auto; }
+.process-section[data-reveal-block]::before,
+.reviews-section[data-reveal-block]::before { background: var(--c-ivory); }
+
+/* prefers-reduced-motion: disattiva ogni transizione/animazione, stato finale immediato */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  [data-reveal], [data-reveal] .mask-line__text {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  [data-reveal="wipe"]::after { display: none; }
+  [data-reveal="underline"]::after { transform: scaleX(1) !important; transition: none !important; }
+  [data-reveal-block]::before { transition: none !important; transform: scaleY(1) !important; }
+  .section-joint { transition: none !important; opacity: 1 !important; transform: none !important; }
+  .btn::before { transition: none !important; }
+  .skeleton-line { animation: none !important; }
+  .btn--loading::after { animation: none !important; }
+  .video-card img { transition: none !important; }
+  /* I nuovi componenti interattivi restano funzionanti: cambia solo
+     l'immagine/il pannello attivo, senza tendine né scorrimenti. */
+  .manifesto__visual-img,
+  .manifesto-item,
+  .manifesto-item::before,
+  .manifesto-item__panel,
+  .process-step__rail::after,
+  .process-step__text,
+  .process-section__img,
+  .video-thumb { transition: none !important; }
+}
+
+/* ---------- SINCRONIA BARRA DI TRANSIZIONE <-> IMMAGINE ----------
+   La barra sopra una sezione e l'effetto sull'immagine dentro la sezione
+   devono muoversi nello stesso verso: la barra "entra" da un lato e
+   l'immagine si scopre dallo stesso lato. Il verso è dichiarato con
+   data-wipe sull'elemento, non dedotto dalla posizione in pagina. */
+[data-reveal="wipe"][data-wipe="right"].is-visible::after {
+  animation-name: wipe-sweep-right;
+}
+@keyframes wipe-sweep-right {
+  0%      { transform-origin: right; transform: scaleX(0); }
+  50%     { transform-origin: right; transform: scaleX(1); }
+  50.001% { transform-origin: left;  transform: scaleX(1); }
+  100%    { transform-origin: left;  transform: scaleX(0); }
+}
+
+/* Cambio immagine: la tendina scorre in orizzontale, nello stesso verso
+   della barra della sezione (prima scorreva sempre dall'alto). */
+/* ATTENZIONE alla forma di inset(): lo stato attivo si scrive con lo 0%
+   esplicito, non con inset(0 0 0 0). Quest.ultimo il browser lo calcola
+   come inset(0px), cioe. la forma abbreviata, che NON e. interpolabile con
+   la forma a quattro valori dello stato di riposo: la transizione veniva
+   saltata di netto e nell.istante del cambio l.immagine uscente era gia.
+   sparita mentre l.entrante non era ancora comparsa (il riquadro restava
+   vuoto, soprattutto su tablet e telefono). */
+.manifesto__visual-img { clip-path: inset(0 100% 0 0); }   /* si scopre da sinistra */
+.process-section__img  { clip-path: inset(0 0 0 100%); }   /* si scopre da destra */
+.manifesto__visual-img.is-active { clip-path: inset(0 0% 0 0); }
+.process-section__img.is-active  { clip-path: inset(0 0 0 0%); }
+
+/* Rete di sicurezza: l.immagine che esce resta sotto, intera, finche. la
+   nuova non ha finito di scoprirsi. Cosi. non puo. esistere un fotogramma
+   con il riquadro vuoto, qualunque cosa faccia la transizione. */
+.manifesto__visual-img,
+.process-section__img { z-index: 0; }
+.manifesto__visual-img.is-previous,
+.process-section__img.is-previous {
+  z-index: 1;
+  clip-path: none;
+  transition: none;
+}
+.manifesto__visual-img.is-active,
+.process-section__img.is-active { z-index: 2; }
+
+/* ---------- UN PACCHETTO COMPLETO ----------
+   Sezione leggera (non a piena altezza): porta il testo reale della
+   pagina live e le cinque voci del servizio, che prima stavano come tag
+   compressi dentro il manifesto. */
+.package { padding-block: var(--space-8); background: var(--c-surface-alt); }
+.package__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+@media (min-width: 900px) {
+  .package__inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); align-items: center; }
+}
+.package .section-head { margin-bottom: var(--space-4); }
+.package__lead { font-size: 16px; line-height: 1.5; color: var(--c-dark-gray); max-width: 56ch; }
+
+/* I tag: non piu' riquadri maiuscoli tutti uguali, ma voci con un segno
+   verde di spunta su superficie chiara, che si sollevano al passaggio.
+   NOTA: 14px e' una deroga esplicita alla regola "minimo 16px ovunque",
+   richiesta per queste voci. */
+.package__list { display: flex; flex-direction: column; gap: var(--space-2); }
+@media (min-width: 560px) { .package__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-3); } }
+@media (min-width: 900px) { .package__list { grid-template-columns: minmax(0, 1fr); } }
+
+.package__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-anthracite);
+  background: var(--c-surface-alt);
+  border-left: 3px solid var(--c-green);
+  padding: var(--space-3) var(--space-4);
+  transition: transform var(--dur-fast) var(--ease-standard), background var(--dur-fast) var(--ease-standard);
+}
+.package__item:hover { transform: translateX(4px); background: var(--c-white); }
+
+/* Spunta disegnata in CSS: due lati di un quadrato ruotati, nessuna icona
+   da caricare e nessuna curva. */
+.package__tick {
+  flex: none;
+  width: 14px;
+  height: 8px;
+  border-left: 3px solid var(--c-green);
+  border-bottom: 3px solid var(--c-green);
+  transform: rotate(-45deg) translateY(-2px);
+}
+
+.package[data-reveal-block]::before { left: auto; right: 0; background: var(--c-green); }
+
+@media (prefers-reduced-motion: reduce) {
+  .package__item { transition: none !important; }
+}
+
+/* ---------- CONTATTI ---------- */
+/* Superficie chiara: sotto c.e il footer antracite, due blocchi scuri di
+   fila si fondevano in uno solo. Il modulo resta bianco e stacca. */
+.contact-section { padding-block: var(--space-8); background: var(--c-white); color: var(--c-anthracite); }
+.contact-section__inner { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+@media (min-width: 900px) {
+  .contact-section__inner { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-8); align-items: start; }
+}
+.contact-section__lead { font-size: 16px; line-height: 1.5; color: var(--c-dark-gray); max-width: 52ch; margin-bottom: var(--space-3); }
+
+.contact-form { background: var(--c-surface-alt); color: var(--c-anthracite); border: 1px solid var(--c-border); padding: var(--space-5); }
+@media (min-width: 560px) { .contact-form { padding: var(--space-6); } }
+.contact-form textarea {
+  width: 100%;
+  min-height: 110px;
+  padding: var(--space-3);
+  font: inherit;
+  font-size: 16px;
+  color: var(--c-anthracite);
+  background: var(--c-white);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  resize: vertical;
+}
+.contact-form textarea:focus { border-color: var(--c-green); border-width: 2px; outline: none; background: var(--c-white); }
+
+.field--check { margin-bottom: var(--space-4); }
+/* Quadratino e testo sulla stessa riga: lo span e. reso block cosi. il suo
+   riquadro parte dal bordo del contenitore e il quadratino si puo.
+   centrare sulla PRIMA riga con un calcolo esatto invece che a occhio. */
+/* Nota: serve `label.check`, non il solo `.check` — la regola generica
+   `.field label` ha specificita. maggiore e rimetteva display:block,
+   impilando testo e quadratino. */
+label.check {
+  --check-size: 20px;
+  --check-line: calc(16px * 1.4);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--c-dark-gray);
+  cursor: pointer;
+}
+label.check > span { display: block; margin: 0; }
+label.check input {
+  flex: none;
+  width: var(--check-size);
+  height: var(--check-size);
+  margin-top: calc((var(--check-line) - var(--check-size)) / 2);
+  accent-color: var(--c-green);
+}
+label.check a { color: var(--c-green); text-decoration: underline; }
+
+.contact-form__handoff {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  background: var(--c-surface-alt);
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--c-anthracite);
+}
+.contact-form__handoff a { color: var(--c-green); font-weight: 700; text-decoration: underline; }
+
+.contact-section[data-reveal-block]::before { background: var(--c-ivory); left: auto; right: 0; }
+
+/* Schermi molto bassi (es. 1280x620: finestra su monitor 1366x768).
+   Ultimo scalino di compattazione perche' la sezione e la sua barra di
+   transizione restino insieme sotto l'header. Si toccano solo distanze e
+   dimensioni dei quadrati numerati, mai il corpo del testo. */
+@media (min-width: 960px) and (max-height: 700px) {
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-3); }
+  .manifesto .section-head,
+  .process-section .section-head { margin-bottom: var(--space-2); }
+  .manifesto__lead { margin-bottom: var(--space-2); padding-bottom: var(--space-1); }
+  .manifesto-item__trigger { padding-block: 4px; }
+  .manifesto-item.is-active .manifesto-item__panel > p { padding-bottom: var(--space-2); }
+  .process-step { padding-block: var(--space-1); }
+  .process-step .num-square { width: 44px; height: 44px; font-size: 16px; }
+  .process-step__text { margin-top: var(--space-1); padding-left: calc(44px + var(--space-4)); }
+}
+
+/* Nome/Cognome/Email/Telefono: griglia a colonne uguali, cosi' i quattro
+   campi hanno esattamente la stessa larghezza. */
+.contact-form__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 var(--space-3); }
+@media (min-width: 480px) { .contact-form__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Recensioni: ogni px tolto all'intestazione va in altezza al player, e
+   quindi in larghezza (il 16:9 lo lega). Testo invariato, solo distanze
+   e corpo dei numeri. */
+@media (min-width: 700px) {
+  .reviews-section { padding-block: var(--space-8) var(--space-6); }
+  .reviews-section__top { padding-bottom: var(--space-3); }
+  /* Su tablet lo stacco fra il paragrafo e i numeri era 12px, meno che su
+     telefono: la compattazione pensata per i portatili bassi arrivava anche
+     qui, dove l'altezza non manca. Sui viewport bassi resta la regola piu'
+     stretta definita piu' avanti (max-height: 900px). */
+  .reviews-section__head { margin-bottom: var(--space-5); }
+  .reviews-section .section-head { margin-bottom: var(--space-3); }
+  .stats-col { gap: var(--space-3) var(--space-7); }
+  .stat__num { font-size: clamp(36px, 4vw, 52px); }
+}
+
+/* ---------- BARRA SINCRONIZZATA CON LO SLIDE DELL'IMMAGINE ----------
+   La tendina su un'immagine (wipe-sweep) dura --dur-slow in due tempi: la
+   prima meta' copre, la seconda scopre. La barra di transizione di quelle
+   sezioni deve muoversi INSIEME allo scoprirsi dell'immagine, quindi parte
+   a meta' animazione e dura l'altra meta'. Il momento di partenza lo
+   allinea il JS, che accende barra e figura nello stesso istante. */
+.section-joint--synced {
+  transition-duration: calc(var(--dur-slow) / 2);
+  transition-delay: calc(var(--dur-slow) / 2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-joint--synced { transition-delay: 0s !important; }
+}
+
+/* Asterisco dei campi obbligatori. E' un segno visivo: e' aria-hidden e la
+   vera informazione per gli screen reader resta l'attributo required
+   sull'input, che viene gia' annunciato. */
+.req { color: var(--c-green); font-weight: 700; }
+.form-legend { font-size: 16px; color: var(--c-dark-gray); margin-bottom: var(--space-4); }
+
+/* La linietta laterale parte insieme alla barra della propria sezione:
+   stesso istante (lo accende il JS), stesso ritardo e stessa durata. Sulle
+   sezioni sincronizzate con lo slide dell'immagine vale lo stesso mezzo
+   tempo della barra, cosi' barra, linietta e immagine si muovono insieme. */
+.section-joint--synced + [data-reveal-block]::before {
+  transition-duration: calc(var(--dur-slow) / 2);
+  transition-delay: calc(var(--dur-slow) / 2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-joint--synced + [data-reveal-block]::before { transition-delay: 0s !important; }
+}
+
+/* ---------- UNA SCHERMATA PER SEZIONE, SOLO DOVE CI STA ----------
+   Manifesto e "Come funziona" stanno in un viewport solo da 960px in su,
+   dove il layout e' a due colonne (immagine accanto al testo). Sotto,
+   l'immagine si impila sopra il contenuto e la sezione vale per forza piu'
+   di una schermata: imporle l'altezza piena significherebbe comprimere o
+   tagliare. Serve anche un viewport abbastanza alto: su un portatile molto
+   basso o con lo zoom spinto il vincolo va lasciato cadere. */
+@media (min-width: 960px) and (min-height: 600px) {
+  .manifesto,
+  .process-section { min-height: var(--section-h); }
+}
+
+/* Il player non puo. collassare: con la sezione a flex e il testo sopra
+   che cresce, su schermi molto bassi si era ridotto a 2px di altezza.
+   Sopra gli 860px il minimo lo garantisce MIN_PLAYER_H in JS. */
+@media (max-width: 859px) { .video-stage { min-height: 200px; } }
+
+/* Bersagli tattili: la checkbox del consenso e i link di lista scendevano
+   sotto i 24px raccomandati per il tocco. */
+label.check { --check-size: 24px; }
+.site-footer__col > a,
+.site-footer__office a { display: inline-block; padding-block: 3px; }
+
+/* Schermi molto stretti (280px: telefoni piccoli, o zoom forte su mobile).
+   La CTA dell'header non andava mai a capo e sporgeva dal viewport: qui
+   puo' spezzarsi su due righe e stringe i margini interni. Il testo resta
+   invariato e leggibile. */
+@media (max-width: 400px) {
+  .site-header__cta { white-space: normal; text-align: center; }
+  .btn--sm { padding-inline: var(--space-3); }
+  .site-header__inner { gap: var(--space-2); }
+}
+
+/* Recensioni su viewport bassi (portatili 1280x620, zoom spinto): si
+   stringe l'intestazione per lasciare al video l'altezza che serve a far
+   stare la sezione in una schermata. Testo invariato, solo distanze e
+   corpo dei numeri. Se anche cosi' non basta, la sezione cresce: mai
+   tagliare. */
+@media (min-width: 700px) and (max-height: 900px) {
+  .reviews-section { padding-block: var(--space-5) var(--space-3); }
+  .reviews-section .section-head { margin-bottom: var(--space-2); }
+  .reviews-section__head { margin-bottom: var(--space-2); }
+  .reviews-section__top { padding-bottom: var(--space-2); }
+  /* Il paragrafo resta: nascondere testo su un viewport basso sarebbe
+     perdita di contenuto, non adattamento. Si stringe soltanto. */
+  .reviews-section__lead { line-height: 1.3; margin-bottom: 0; }
+  .stats-col { gap: var(--space-2) var(--space-6); }
+  .stat__num { font-size: clamp(28px, 3vw, 36px); }
+}
+
+/* =================================================================
+   ESPERIENZA MOBILE
+   ================================================================= */
+
+/* Aree di tocco comode. I link del footer erano alti 30px e impilati:
+   con il pollice si sbagliava facilmente voce. */
+@media (pointer: coarse) {
+  .site-footer__col > a,
+  .site-footer__office a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .manifesto-item__trigger,
+  .process-step__trigger { min-height: 48px; }
+}
+
+/* Risposta immediata al tocco: niente ritardo di 300ms, niente rettangolo
+   grigio di sistema, e un riscontro visivo quando il dito preme. */
+.btn,
+.manifesto-item__trigger,
+.process-step__trigger,
+.video-thumb,
+.video-card,
+label.check,
+.site-header__logo,
+.site-footer__brand,
+.site-footer__col > a,
+.site-footer__office a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: translateY(1px); }
+.manifesto-item__trigger:active,
+.process-step__trigger:active { background: var(--c-surface-alt); }
+.video-thumb:active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .btn:active { transform: none; }
+}
+
+/* Scorrimento fluido con inerzia per il carosello Instagram su iOS. */
+.ig-feed { -webkit-overflow-scrolling: touch; scroll-padding-inline: var(--gutter); }
+
+/* Niente velo antracite su queste due figure. Avevano due meccanismi di
+   comparsa sovrapposti: la tendina scura di [data-reveal="wipe"] e la
+   tendina della singola immagine. Il velo copre il riquadro per meta' della
+   sua durata, quindi chi arrivava alla sezione e passava subito sui punti
+   vedeva cambiare i testi ma NON l'immagine, nascosta dietro il velo.
+   La comparsa resta affidata alla tendina dell'immagine, che e' gia'
+   sincronizzata con la barra di transizione della sezione. L'attributo
+   data-reveal resta nel markup perche' e' l'aggancio della sincronia. */
+.manifesto__visual[data-reveal="wipe"]::after,
+.process-section__visual[data-reveal="wipe"]::after { display: none; }
+
+/* ---------- RIFINITURE MOBILE ---------- */
+@media (max-width: 639px) {
+  /* La fascia dell'occhiello nella hero pesava troppo su schermo stretto:
+     mandava a capo e rubava altezza al form. Come per i tag del pacchetto,
+     e' una deroga voluta al minimo di 16px — e' un'etichetta, non testo
+     da leggere. */
+  /* Spaziatura ridotta oltre al corpo: a 0.08em la fascia andava comunque
+     a capo su due righe (294px richiesti contro 293 disponibili). */
+  .eyebrow--band { font-size: 13px; letter-spacing: 0.04em; }
+
+  /* Via le targhette sopra le immagini: su telefono coprono una parte
+     importante di una foto gia' piccola, e l'informazione c'e' gia'
+     nell'elenco sotto (numero + titolo del punto attivo). */
+  .manifesto__visual-tag,
+  .process-section__marker { display: none; }
+
+  /* Sezione social allineata al ritmo delle altre: aveva 64px di padding e
+     64px sotto il paragrafo, molto piu' aria del resto della pagina. */
+  .social-section { padding-block: var(--space-6); }
+  .social-section__lead { margin-bottom: 0; }
+  .ig-feed { margin-top: var(--space-4); }
+
+  /* La cornice della lente esce dai bordi dello schermo: niente bordo
+     laterale visibile, solo le due linee sopra e sotto. Si usa la tecnica
+     del 50% + 50vw perche' il form e' centrato e la sua larghezza cambia. */
+  .lens-layer {
+    inset-block: calc(-1 * var(--lens-y));
+    left: 50%;
+    right: auto;
+    width: 100vw;
+    margin-left: -50vw;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+/* ---------- FOOTER SU MOBILE ----------
+   Le voci erano troppo distanziate: al gap della colonna si sommava
+   l'altezza minima di 44px che avevo dato per il tocco, e ogni riga
+   occupava piu' del doppio del suo testo. Qui l'area di tocco resta
+   comoda ma la si ottiene con il padding della riga invece che con un
+   min-height che gonfia tutto, e il gap si stringe.
+   Il corpo del testo scende a 15px: come per le altre etichette mobile,
+   e' una deroga voluta al minimo di 16px. */
+@media (max-width: 959px) {
+  .site-footer { padding-block: var(--space-6) var(--space-4); }
+  .site-footer__top { gap: var(--space-3); margin-bottom: var(--space-5); padding-bottom: var(--space-5); }
+  /* Testo sotto il logo e riga legale finale: sono testi di servizio, non
+     di lettura, e possono stare sotto il corpo delle altre voci. */
+  .site-footer__tagline { font-size: 14px; }
+  .site-footer__grid { gap: var(--space-5); margin-bottom: var(--space-5); }
+
+  /* Le colonne "Il gruppo", "Seguici" e "Legale" sono elenchi di link:
+     l.aria fra una voce e l.altra la da. gia. il padding della riga, il gap
+     del contenitore la raddoppiava. */
+  .site-footer__col { gap: 0; }
+  /* Con gap 0 il titolo di colonna ha bisogno di un suo distacco. */
+  .site-footer__col h3 { font-size: 15px; margin-bottom: var(--space-2); }
+  .site-footer__col-spacer { margin-top: var(--space-3); }
+  .site-footer__col > a,
+  .site-footer__office a { font-size: 15px; }
+  .site-footer__office { gap: 0; margin-bottom: var(--space-3); }
+  .site-footer__office strong { font-size: 15px; margin-bottom: 0; }
+  .site-footer__address { font-size: 15px; }
+  .site-footer__bottom { font-size: 13px; gap: var(--space-1); padding-top: var(--space-4); line-height: 1.4; }
+}
+
+/* L'area di tocco comoda si ottiene con il padding, non con un min-height:
+   cosi' le righe non si allontanano fra loro. */
+@media (pointer: coarse) and (max-width: 959px) {
+  .site-footer__col > a,
+  .site-footer__office a {
+    min-height: 0;
+    display: block;
+    padding-block: 5px;
+  }
+}
+
+/* ---------- SEZIONI A ELENCO SU MOBILE E TABLET ----------
+   Su schermi stretti l'immagine sta sopra l'elenco: se la sezione e' piu'
+   alta del viewport, quando si scorre per raggiungere gli ultimi punti
+   l'immagine esce dallo schermo e non si vede piu' cambiare. Qui si toglie
+   aria (mai testo) perche' immagine + titolo + elenco stiano insieme nello
+   spazio sotto l'header. Misure di partenza: la sezione "Come funziona"
+   sforava di 130px a 375 e di 80px a 768. */
+@media (max-width: 959px) {
+  .manifesto__content { padding-block: var(--space-3); }
+  .manifesto__lead { margin-bottom: var(--space-1); padding-bottom: var(--space-1); }
+  .manifesto-item__trigger { padding-block: var(--space-1); }
+  .process-section__content { padding-block: var(--space-3); }
+  .manifesto .section-head,
+  .process-section .section-head { margin-bottom: var(--space-3); }
+  .manifesto__lead { margin-bottom: var(--space-2); padding-bottom: var(--space-2); }
+
+  .manifesto-item__trigger { padding-block: var(--space-2); }
+  .manifesto-item.is-active .manifesto-item__panel > p { padding-bottom: var(--space-2); }
+
+  .process-step { padding-block: var(--space-2); }
+  .process-step .num-square { width: 44px; height: 44px; font-size: 16px; }
+  .process-step__title { font-size: 17px; }
+  .process-step__text { margin-top: var(--space-1); padding-left: calc(44px + var(--space-4)); }
+}
+
+/* Solo su telefono: la fascia dell'immagine si abbassa un po' (2:1 invece
+   di 16:9) e le ultime distanze si stringono. Servono i ~40px che ancora
+   mancavano perche' l'intera sezione stia sotto l'header a 375x812. Le due
+   sezioni restano identiche fra loro. */
+@media (max-width: 639px) {
+  .manifesto__visual,
+  .process-section__visual { aspect-ratio: 2 / 1; }
+  .manifesto__lead { margin-bottom: var(--space-1); padding-bottom: var(--space-1); }
+  .manifesto-item__trigger { padding-block: 6px; }
+  .process-step { padding-block: 6px; }
+}
+
+/* Telefoni con schermo piu' basso (es. 360x740): la fascia dell'immagine
+   si accorcia ancora e le distanze si riducono al minimo, sempre senza
+   toccare i testi. Sotto questa soglia la sezione supera comunque lo
+   schermo, ma di poco. */
+@media (max-width: 639px) and (max-height: 780px) {
+  .manifesto__visual,
+  .process-section__visual { aspect-ratio: 5 / 2; }
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-2); }
+  .manifesto .section-head,
+  .process-section .section-head { margin-bottom: var(--space-2); }
+  .manifesto-item__trigger,
+  .process-step { padding-block: 4px; }
+}
+
+/* ---------- PLAYER SU TABLET E TELEFONO ----------
+   Il player ereditava il 4:5 di .video-card, che nel foglio viene DOPO
+   .video-card--stage e vince a parita' di specificita'. Sopra gli 860px una
+   media query lo correggeva, sotto no: su tablet il video diventava un
+   blocco verticale da 689x861 e la sezione arrivava a 1428px contro 916 di
+   schermo, quindi non si riusciva a vedere il video grande mentre si
+   passava da una miniatura all'altra. Qui il 16:9 e' esplicito e la riga
+   del contenitore torna ad altezza naturale. */
+@media (max-width: 859px) {
+  .video-stage { grid-template-rows: auto auto; min-height: 0; }
+  .video-card--stage {
+    aspect-ratio: 16 / 9;
+    height: auto;
+    width: 100%;
+  }
+}
+
+/* Recensioni su tablet: con il player finalmente in 16:9 mancavano ancora
+   38px perche' la sezione stesse sotto l'header. Si riduce il respiro della
+   sezione (non quello sopra il titolo, che resta leggibile) invece di
+   rimpicciolire ancora il video, che qui e' il contenuto principale. */
+@media (min-width: 700px) and (max-width: 959px) {
+  .reviews-section { padding-block: var(--space-6) var(--space-4); }
+}
+
+/* ---------- TETTO ALL'ALTEZZA DELLE IMMAGINI SUI LAYOUT IMPILATI ----------
+   Con il solo aspect-ratio, su un viewport largo ma basso (es. 837x861) la
+   fascia diventava alta 462px su 753 utili e non lasciava spazio ai punti
+   selezionabili: immagine ed elenco finivano in schermate diverse. Il tetto
+   e' espresso in vh, cosi' si adatta da solo a qualunque combinazione di
+   larghezza e altezza invece di dipendere da soglie fisse. */
+@media (max-width: 959px) {
+  /* width: 100% e. indispensabile accanto al tetto in vh: con il solo
+     aspect-ratio, limitare l.altezza faceva RESTRINGERE la larghezza per
+     mantenere la proporzione (619px su 753), lasciando una fascia vuota a
+     destra. Cosi. invece la larghezza resta piena e a cedere e. l.altezza,
+     con il ritaglio gestito da object-fit: cover. */
+  .manifesto__visual,
+  .process-section__visual { max-height: 46vh; width: 100%; }
+}
+
+/* Stesso principio per il player: sotto gli 860px il 16:9 su un viewport
+   largo e basso mangiava l'altezza che serve alle miniature. */
+@media (max-width: 859px) {
+  .video-card--stage { max-height: 40vh; }
+}
+
+/* Viewport largo ma corto (es. 837x861, tablet in orizzontale): il tetto
+   scende ancora, perche' li' l'altezza e' la risorsa scarsa. */
+@media (max-width: 959px) and (max-height: 900px) {
+  .manifesto__visual,
+  .process-section__visual { max-height: 41vh; }
+}
+
+/* Recensioni su telefoni bassi (es. 360x740): la compattazione esisteva
+   solo da 700px in su. Qui si riducono padding e corpo dei numeri perche'
+   testo, video e miniature stiano insieme in una schermata. */
+@media (max-width: 699px) and (max-height: 780px) {
+  .reviews-section { padding-block: var(--space-4) var(--space-3); }
+  .reviews-section__head { margin-bottom: var(--space-2); }
+  .reviews-section .section-head { margin-bottom: var(--space-2); }
+  .reviews-section__top { padding-bottom: var(--space-2); }
+  .stats-col { gap: var(--space-2); }
+  .stat__num { font-size: clamp(28px, 8vw, 36px); }
+}
+
+/* Stacco fra paragrafo e feed allineato a quello delle altre sezioni
+   (32px misurati, come in "Un pacchetto completo"). Il valore e' maggiore
+   del margine nominale perche' parte del margine viene assorbita
+   dall'interlinea del paragrafo che lo precede: qui conta lo stacco che si
+   vede, verificato a schermo. */
+.social-section .ig-feed { margin-top: var(--space-7); }
+
+/* ---------- RECUPERO ALTEZZA PER LE IMMAGINI (mobile e tablet) ----------
+   Alzare il tetto dell'immagine serve a poco se il testo si prende tutto
+   lo spazio: qui si comprime il lato testo per restituire altezza alla
+   foto, che altrimenti resta una fascia troppo ritagliata. Si toccano solo
+   distanze e dimensioni dei quadrati numerati, mai il corpo del testo. */
+@media (max-width: 959px) {
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-2); }
+  .manifesto .section-head,
+  .process-section .section-head { margin-bottom: var(--space-2); }
+  .manifesto-item.is-active .manifesto-item__panel > p { padding-bottom: var(--space-1); }
+  .manifesto-item__panel > p,
+  .process-step__text { line-height: 1.35; }
+  .process-step .num-square { width: 40px; height: 40px; }
+  .process-step__text { padding-left: calc(40px + var(--space-4)); }
+}
+
+/* Su layout impilato il testo occupa tutta la larghezza: i limiti a 52-54ch
+   servono alla colonna stretta del desktop, ma su un tablet largo lasciano
+   meta' riga vuota e mandano a capo il doppio delle volte. Togliendoli si
+   recupera altezza reale da dare all'immagine, senza rimpicciolire nulla. */
+@media (min-width: 560px) and (max-width: 959px) {
+  .manifesto__lead,
+  .manifesto-list,
+  .process-list,
+  .manifesto-item__panel > p,
+  .process-step__text { max-width: none; }
+}
+
+/* Composizione dei paragrafi: il browser distribuisce le righe evitando
+   vedove e righe finali troppo corte. Va a braccetto con initTipografia()
+   in main.js, che impedisce gli a capo dopo articoli e preposizioni: dove
+   text-wrap: pretty non e' supportato resta comunque attiva la regola JS. */
+main p,
+main li,
+.site-footer p,
+.manifesto-item__panel > p,
+.process-step__text { text-wrap: pretty; }
+
+/* I titoli non devono mai spezzarsi male: qui conta l'equilibrio fra le
+   righe piu' della densita'. */
+main h1,
+main h2,
+main h3 { text-wrap: balance; }
+
+/* Eccezione: nei titoli affiancati al quadrato numerico la colonna e' stretta
+   e il bilanciamento tende a isolare la prima parola lunga su una riga da
+   sola ("Valorizzazione"). Qui serve la densita', non l'equilibrio. */
+.manifesto-item__head,
+.process-step__title { text-wrap: pretty; }
