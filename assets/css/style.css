@@ -52,6 +52,12 @@
   --dur-fast: 150ms;
   --dur-base: 320ms;
   --dur-slow: 520ms;
+  /* Tendina delle immagini: curva simmetrica e durata piu' lunga. Con la
+     ease-out esponenziale del resto della pagina il 90% della corsa si
+     consumava nei primi 80ms e il cambio si leggeva come un taglio secco,
+     non come uno scorrimento. */
+  --dur-wipe: 620ms;
+  --ease-wipe: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* Layout */
   --container-w: 1200px;
@@ -932,7 +938,11 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .reviews-section .section-head { margin-bottom: var(--space-3); }
 @media (min-width: 700px) { .reviews-section .section-head { margin-bottom: var(--space-5); } }
 .reviews-section__head { margin-bottom: var(--space-4); }
-.reviews-section__lead { font-size: 16px; color: var(--c-light-gray); max-width: 56ch; }
+/* Niente tetto di 56ch: il paragrafo sta su una riga sola dove la larghezza
+   lo permette (gli servono 862px, la colonna ne ha 1200). Sotto quella
+   soglia va a capo da se': una riga forzata avrebbe sfondato il contenitore
+   sui formati stretti. */
+.reviews-section__lead { font-size: 16px; color: var(--c-light-gray); }
 @media (min-width: 700px) {
   .reviews-section__head { margin-bottom: var(--space-5); }
   .reviews-section__lead { font-size: 17px; }
@@ -1100,42 +1110,103 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 /* Su mobile i post scorrono in orizzontale con lo snap: impilati sarebbero
    un muro di quasi 3000px in mezzo a una landing da conversione. Da 640px
    in su tornano una griglia. */
+/* La bacheca sara' pubblicata con il plugin gratuito WordPress/Elementor
+   (Smash Balloon e simili): quelli rendono una griglia di riquadri QUADRATI
+   con la sola fotografia, gap uniforme, nessuna intestazione e nessuna
+   didascalia per post, e un bottone "segui" sotto la griglia. Qui si
+   riproduce quella forma con gli embed ufficiali, cosi' il passaggio al
+   plugin non cambia l'aspetto della sezione: 2 colonne su telefono,
+   3 da tablet in su, come le impostazioni predefinite di quei plugin.
+   Niente piu' carosello orizzontale: i plugin non ne hanno uno nella
+   versione gratuita. */
 .ig-feed {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 86%;
-  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
   margin-top: var(--space-6);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x mandatory;
-  /* Lo scorrimento arriva fino ai bordi dello schermo, non si ferma al
-     gutter: si capisce che c'è altro oltre il margine. */
-  margin-inline: calc(-1 * var(--gutter));
-  padding-inline: var(--gutter);
-  padding-bottom: var(--space-2);
 }
 @media (min-width: 640px) {
-  .ig-feed {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-    overflow-x: visible;
-    margin-inline: 0;
-    padding-inline: 0;
-  }
+  .ig-feed { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
 }
-@media (min-width: 960px) { .ig-feed { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .ig-feed__item {
   position: relative;
-  height: 440px;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  border: 1px solid var(--c-border);
   background: var(--c-surface-alt);
-  scroll-snap-align: start;
 }
-@media (min-width: 640px) { .ig-feed__item { height: 480px; } }
-.ig-feed__item iframe { width: 100%; height: 100%; border: 0; display: block; }
+/* Ritaglio della cornice dell'embed. La pagina /embed/ di Instagram mette
+   sopra la foto una barra con avatar e nome (--ig-crop-top) e sotto la
+   didascalia con i comandi: l'iframe viene tirato su e reso piu' alto del
+   riquadro, cosi' nel quadrato resta solo la fotografia, come nelle
+   miniature del plugin. Non e' possibile intervenire dentro l'iframe:
+   e' di un altro dominio. */
+.ig-feed__item iframe {
+  /* Altezza della barra con avatar e nome in cima all'embed: misurata a
+     schermo, sta fra i 40 e i 50px a seconda della larghezza. */
+  /* Altezza della barra con avatar e nome in cima all'embed. Non e' fissa:
+     misurata sulla resa, la parte che restava scoperta valeva circa il 5%
+     del riquadro su desktop e il 7% su telefono — ed era proprio quella
+     fascia grigia sopra le fotografie che le faceva sembrare piu' basse
+     dei video accanto. Da qui la parte percentuale. */
+  --ig-crop-top: calc(7% + 45px);
+  /* Scorrimento verticale aggiuntivo dell'inquadratura. Zero per le
+     fotografie, che sono gia' inquadrate bene; positivo per i reel (vedi
+     sotto), il cui video verticale e' molto piu' alto del quadrato. */
+  --ig-crop-shift: 0px;
+  position: absolute;
+  top: calc(-1 * (var(--ig-crop-top) + var(--ig-crop-shift)));
+  /* L'iframe e' anche piu' largo del riquadro: la foto dentro l'embed e'
+     larga quanto l'iframe, quindi allargandolo di 2x l'altezza della barra
+     la foto diventa alta abbastanza da coprire il quadrato anche quando e'
+     quadrata (i post 1:1, dove altrimenti sotto restava la didascalia).
+     Il di piu' in larghezza si taglia ai lati, come in una miniatura. */
+  /* Quanto allargare per lato. Misurato: alla foto serve un'altezza pari a
+     quella del quadrato piu' la barra, e l'altezza della foto cresce con la
+     larghezza dell'iframe; la parte fissa copre la barra, la percentuale
+     accompagna la crescita del riquadro. Piu' di cosi' e' zoom inutile. */
+  /* Allargando l'iframe la fotografia dentro l'embed diventa piu' alta:
+     serve a coprire il quadrato anche adesso che l'inquadratura e' salita
+     di piu' per togliere la fascia grigia in cima. */
+  --ig-crop-side: calc(14% + 52px);
+  left: calc(-1 * var(--ig-crop-side));
+  width: calc(100% + var(--ig-crop-side) * 2);
+  height: calc(100% + var(--ig-crop-side) * 2 + var(--ig-crop-shift) + 45%);
+  border: 0;
+  display: block;
+}
+
+/* Titolo a sinistra, bottone a destra sulla stessa linea di base ottica.
+   Il bottone e' lo stesso btn--accent delle altre CTA della pagina: stesso
+   verde pieno, stesso riempimento bianco che scorre in hover. */
+.social-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  margin-bottom: var(--space-4);
+}
+.social-section__head .section-head { margin-bottom: 0; }
+/* Reel: geometria propria. Il video verticale (9:16) dentro l'embed sta in
+   una cassa piu' larga di lui, quindi con la stessa larghezza delle foto
+   restavano due bande nere ai lati e il riquadro sembrava piu' piccolo
+   degli altri. Allargando l'iframe il video arriva a filo dei bordi, e
+   l'alzata e' calcolata perche' il centro del video — dov'e' il simbolo
+   play — cada al centro del quadrato. Le fotografie hanno la loro
+   geometria piu' sopra: li' alzare scoprirebbe la didascalia. */
+.ig-feed__item--reel iframe {
+  left: -18.5%;
+  width: 137%;
+  top: -66%;
+  height: 300%;
+}
+/* Da tablet in su il riquadro e' piu' grande e l'inquadratura puo' scendere
+   ancora senza scoprire il fondo dell'embed. */
+@media (min-width: 640px) {
+  .ig-feed__item--reel iframe { top: -56%; }
+}
+
+.ig-feed__follow { margin: 0; }
 
 /* ---------- CTA FINALE + QUOTE ----------
    Superficie chiara, non antracite: la sezione Recensioni appena sopra
@@ -1349,6 +1420,12 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .process-section__img  { clip-path: inset(0 0 0 100%); }   /* si scopre da destra */
 .manifesto__visual-img.is-active { clip-path: inset(0 0% 0 0); }
 .process-section__img.is-active  { clip-path: inset(0 0 0 0%); }
+
+/* La tendina usa la propria curva: il bordo che avanza deve essere visibile
+   per tutta la corsa. Sta qui, dopo le regole di direzione, per vincere
+   sulla transizione dichiarata nei blocchi delle due sezioni. */
+.manifesto__visual-img,
+.process-section__img { transition: clip-path var(--dur-wipe) var(--ease-wipe); }
 
 /* Rete di sicurezza: l.immagine che esce resta sotto, intera, finche. la
    nuova non ha finito di scoprirsi. Cosi. non puo. esistere un fotogramma
@@ -1643,8 +1720,8 @@ label.check,
   .btn:active { transform: none; }
 }
 
-/* Scorrimento fluido con inerzia per il carosello Instagram su iOS. */
-.ig-feed { -webkit-overflow-scrolling: touch; scroll-padding-inline: var(--gutter); }
+/* (Il carosello orizzontale del feed non esiste piu': la bacheca e' una
+   griglia a riquadri quadrati, come il plugin che verra' usato online.) */
 
 /* Niente velo antracite su queste due figure. Avevano due meccanismi di
    comparsa sovrapposti: la tendina scura di [data-reveal="wipe"] e la
@@ -1675,9 +1752,48 @@ label.check,
 
   /* Sezione social allineata al ritmo delle altre: aveva 64px di padding e
      64px sotto il paragrafo, molto piu' aria del resto della pagina. */
+  /* Su telefono la CTA dell'header occupava piu' di meta' della barra:
+     si stringe leggermente su padding e altezza, restando ben oltre i
+     44px di area toccabile consigliati. Il corpo del testo non cambia. */
+  /* Le due immagini della consulenza (stesso scatto, punto 2 del manifesto e
+     passo 3 di "Come funziona"). Su telefono la fascia visibile e' bassa e
+     larga: con il ritaglio centrato le teste finivano a filo del bordo alto.
+     Spostando la finestra di ritaglio verso l'alto dell'originale, il
+     contenuto scende dentro il riquadro. */
+  .manifesto__visual-img[data-pillar-img="2"],
+  .process-section__img[data-step-img="3"] { object-position: 50% 4%; }
+
+  .site-header__cta {
+    min-height: 40px;
+    padding: 6px var(--space-3);
+    letter-spacing: 0.01em;
+    border-width: 1px;
+  }
+
+  /* Su telefono il bottone accanto al titolo non ci sta in larghezza e
+     finiva a capo subito sotto, prima ancora del testo: va in fondo alla
+     sezione, centrato, dove chiude il blocco invece di interromperlo.
+     display: contents scioglie la riga titolo+bottone e lascia i due
+     elementi liberi di prendere posto nella colonna della sezione. */
+  .social-section .container { display: flex; flex-direction: column; }
+  .social-section__head { display: contents; }
+  .social-section__head .section-head { margin-bottom: var(--space-3); }
+  .social-section__lead { order: 1; }
+  .ig-feed { order: 2; }
+  .ig-feed__follow { order: 3; align-self: center; margin-top: var(--space-5); }
+
   .social-section { padding-block: var(--space-6); }
   .social-section__lead { margin-bottom: 0; }
   .ig-feed { margin-top: var(--space-4); }
+
+  /* Su schermo stretto le due linee di transizione pesano piu' che su
+     desktop, perche' la stessa quantita' di colore occupa una fetta molto
+     maggiore della larghezza: la barra orizzontale scende da 18 a 12px e
+     la linietta laterale da 8 a 5px. Solo lo spessore, non la lunghezza.
+     --joint-h e' un token: cambiandolo qui si aggiorna da se' anche
+     --section-h, cioe' l'altezza delle sezioni a piena schermata. */
+  :root { --joint-h: 12px; }
+  [data-reveal-block]::before { width: 5px; }
 
   /* La cornice della lente esce dai bordi dello schermo: niente bordo
      laterale visibile, solo le due linee sopra e sotto. Si usa la tecnica
@@ -1765,9 +1881,21 @@ label.check,
    mancavano perche' l'intera sezione stia sotto l'header a 375x812. Le due
    sezioni restano identiche fra loro. */
 @media (max-width: 639px) {
+  /* 5:3 invece di 2:1: la fascia passa da 195 a 234px su un telefono da
+     390px di larghezza, quasi 40px di foto in piu'. Misurato il margine
+     prima di alzarla: la sezione piu' alta delle due (il manifesto con il
+     primo punto aperto) occupava 693px dei 748 disponibili sotto l'header,
+     quindi lo spazio c'era. Le due sezioni restano identiche fra loro. */
   .manifesto__visual,
-  .process-section__visual { aspect-ratio: 2 / 1; }
+  .process-section__visual { aspect-ratio: 5 / 3; }
   .manifesto__lead { margin-bottom: var(--space-1); padding-bottom: var(--space-1); }
+  /* Sotto i 390px il 5:3 fa sforare il manifesto di 7px: li' la fascia
+     resta un gradino piu' bassa (16:9), comunque piu' generosa del 2:1
+     di prima. */
+  @media (max-width: 389px) {
+    .manifesto__visual,
+    .process-section__visual { aspect-ratio: 16 / 9; }
+  }
   .manifesto-item__trigger { padding-block: 6px; }
   .process-step { padding-block: 6px; }
 }
@@ -1841,6 +1969,21 @@ label.check,
   .process-section__visual { max-height: 41vh; }
 }
 
+/* Recensioni su telefoni di altezza normale (390x844 e simili): qui lo
+   spazio c'e' e la sezione non deve stare stretta. Misurato prima: il
+   paragrafo attaccava i numeri con 0px di stacco e le tre statistiche
+   erano separate da 12px, con la sezione che occupava 625px di 844.
+   Si restituisce respiro dove serve, restando dentro una schermata.
+   La soglia min-height tiene fuori i telefoni bassi, che poco sotto
+   hanno la regola opposta. */
+@media (max-width: 639px) and (min-height: 781px) {
+  .reviews-section { padding-block: var(--space-7) var(--space-6); }
+  .reviews-section .section-head { margin-bottom: var(--space-5); }
+  .reviews-section__head { margin-bottom: var(--space-5); }
+  .stats-col { gap: var(--space-4); }
+  .reviews-section__top { padding-bottom: var(--space-5); }
+}
+
 /* Recensioni su telefoni bassi (es. 360x740): la compattazione esisteva
    solo da 700px in su. Qui si riducono padding e corpo dei numeri perche'
    testo, video e miniature stiano insieme in una schermata. */
@@ -1858,7 +2001,13 @@ label.check,
    del margine nominale perche' parte del margine viene assorbita
    dall'interlinea del paragrafo che lo precede: qui conta lo stacco che si
    vede, verificato a schermo. */
-.social-section .ig-feed { margin-top: var(--space-7); }
+/* Solo da 640px in su: su telefono questa regola vinceva su quella delle
+   rifiniture mobile (stessa cascata, specificita' maggiore) e sotto il
+   paragrafo restavano 48px, molto piu' del resto della pagina. */
+@media (min-width: 640px) {
+  .social-section .ig-feed { margin-top: var(--space-7); }
+}
+
 
 /* ---------- RECUPERO ALTEZZA PER LE IMMAGINI (mobile e tablet) ----------
    Alzare il tetto dell'immagine serve a poco se il testo si prende tutto
@@ -1910,3 +2059,24 @@ main h3 { text-wrap: balance; }
    sola ("Valorizzazione"). Qui serve la densita', non l'equilibrio. */
 .manifesto-item__head,
 .process-step__title { text-wrap: pretty; }
+/* ---------- RESPIRO SOPRA E SOTTO LE SEZIONI (tablet e telefono) ----------
+   Le tre sezioni alte (manifesto, "Come funziona", recensioni) erano state
+   compresse fino a 8px di padding per farle stare in una schermata, e
+   attaccavano al giunto sopra e alla sezione sotto. Misurato lo spazio
+   libero prima di restituirlo: su tablet (834x1112, budget 1004px) il
+   manifesto ne usava 859 e "Come funziona" 817, quindi c'erano 145 e 187px
+   inutilizzati; su telefono (390x844, budget 748) il margine era molto piu'
+   sottile, 16px, e li' si restituisce solo quello che c'e'.
+   Nelle recensioni il player si ridimensiona da se' (sizeVideoStage in
+   main.js misura l'ingombro attorno), quindi il padding in piu' viene
+   assorbito senza far crescere la sezione. */
+@media (min-width: 640px) and (max-width: 959px) {
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-6); }
+  .reviews-section { padding-block: var(--space-8) var(--space-7); }
+}
+@media (max-width: 639px) and (min-height: 781px) {
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-4); }
+  .reviews-section { padding-block: var(--space-8) var(--space-7); }
+}

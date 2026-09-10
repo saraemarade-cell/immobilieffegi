@@ -466,9 +466,18 @@
        ============================================================ -->
   <section class="social-section" data-reveal-block>
     <div class="container">
-      <h2 class="section-head" data-reveal="mask">
-        <span class="mask-line"><span class="mask-line__text">Seguici sui social</span></span>
-      </h2>
+      <!-- Titolo e bottone "segui" sulla stessa riga: e' la disposizione dei
+           plugin gratuiti, che mettono il richiamo al profilo in testa alla
+           bacheca. Su schermo stretto il bottone va a capo sotto il titolo. -->
+      <div class="social-section__head">
+        <h2 class="section-head" data-reveal="mask">
+          <span class="mask-line"><span class="mask-line__text">Seguici sui social</span></span>
+        </h2>
+        <p class="ig-feed__follow" data-reveal="stagger" data-reveal-order="1">
+          <a class="btn btn--accent btn--sm" href="https://www.instagram.com/effegigruppoimmobiliare/"
+             target="_blank" rel="noopener">Seguici su Instagram</a>
+        </p>
+      </div>
       <p class="social-section__lead" data-reveal="stagger" data-reveal-order="1">
         Annunci, case history e aggiornamenti dal territorio: gli ultimi post dal nostro profilo Instagram.
       </p>

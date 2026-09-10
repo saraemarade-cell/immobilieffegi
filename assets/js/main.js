@@ -440,19 +440,30 @@
 
     var codes = (feed.getAttribute("data-ig-posts") || "")
       .split(",")
-      .map(function (entry) { return toShortcode(entry.trim()); })
+      .map(function (entry) {
+        var pulito = entry.trim();
+        return {
+          code: toShortcode(pulito),
+          // I reel hanno un video verticale: nel riquadro quadrato il
+          // soggetto e il testo sovrimpresso cadono troppo in basso e
+          // vengono tagliati. Si segnano qui per alzarne l'inquadratura
+          // via CSS; le fotografie restano come sono.
+          reel: pulito.indexOf("/reel/") > -1
+        };
+      })
       // Il filtro non è cosmetico: impedisce che un valore arbitrario
       // finisca dentro l'URL dell'iframe.
-      .filter(function (code) { return !!code; });
+      .filter(function (post) { return !!post.code; });
 
     if (!codes.length) {
       feed.parentNode.removeChild(feed);
       return;
     }
 
-    codes.forEach(function (code, i) {
+    codes.forEach(function (post, i) {
+      var code = post.code;
       var cell = document.createElement("div");
-      cell.className = "ig-feed__item";
+      cell.className = "ig-feed__item" + (post.reel ? " ig-feed__item--reel" : "");
       var iframe = document.createElement("iframe");
       iframe.src = "https://www.instagram.com/p/" + code + "/embed/";
       iframe.title = "Post Instagram di Effegi Gruppo Immobiliare";
