@@ -1205,6 +1205,12 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 @media (min-width: 640px) {
   .ig-feed__item--reel iframe { top: -56%; }
 }
+/* Su desktop il riquadro e' il piu' grande di tutti (360px) e regge
+   l'inquadratura piu' bassa senza scoprire lo sfondo dell'embed sopra il
+   video. Oltre questo valore il bordo alto del video entrerebbe in campo. */
+@media (min-width: 960px) {
+  .ig-feed__item--reel iframe { top: -50%; }
+}
 
 .ig-feed__follow { margin: 0; }
 
@@ -1887,14 +1893,13 @@ label.check,
      primo punto aperto) occupava 693px dei 748 disponibili sotto l'header,
      quindi lo spazio c'era. Le due sezioni restano identiche fra loro. */
   .manifesto__visual,
-  .process-section__visual { aspect-ratio: 5 / 3; }
+  .process-section__visual { aspect-ratio: 3 / 2; }
   .manifesto__lead { margin-bottom: var(--space-1); padding-bottom: var(--space-1); }
-  /* Sotto i 390px il 5:3 fa sforare il manifesto di 7px: li' la fascia
-     resta un gradino piu' bassa (16:9), comunque piu' generosa del 2:1
-     di prima. */
+  /* Sotto i 390px la fascia resta un gradino piu' bassa, in proporzione
+     allo schermo piu' stretto. */
   @media (max-width: 389px) {
     .manifesto__visual,
-    .process-section__visual { aspect-ratio: 16 / 9; }
+    .process-section__visual { aspect-ratio: 5 / 3; }
   }
   .manifesto-item__trigger { padding-block: 6px; }
   .process-step { padding-block: 6px; }
@@ -2075,8 +2080,22 @@ main h3 { text-wrap: balance; }
   .process-section__content { padding-block: var(--space-6); }
   .reviews-section { padding-block: var(--space-8) var(--space-7); }
 }
+/* Su telefono le tre sezioni possono superare la schermata: il vincolo di
+   stare tutte in un viewport e' stato allentato di proposito, perche' la
+   compressione che serviva a rispettarlo le rendeva soffocate. Qui il
+   padding torna a quello delle sezioni normali della pagina. */
 @media (max-width: 639px) and (min-height: 781px) {
+  /* Chiusura allineata a "Un pacchetto completo" (64px): tutte le sezioni
+     lunghe finiscono alla stessa quota dal giunto che le separa. In cima
+     il manifesto e "Come funziona" partono con l'immagine a tutta larghezza,
+     quindi li' il padding del testo resta 32px: i 64 varrebbero come stacco
+     dalla foto, non dal bordo della sezione. */
   .manifesto__content,
-  .process-section__content { padding-block: var(--space-4); }
-  .reviews-section { padding-block: var(--space-8) var(--space-7); }
+  .process-section__content { padding-block: var(--space-6) var(--space-8); }
+  /* Stacco in cima allineato a "Un pacchetto completo" (64px): le sezioni
+     lunghe della pagina devono attaccare tutte alla stessa quota. */
+  .reviews-section { padding-block: var(--space-8) var(--space-8); }
+  .social-section { padding-block: var(--space-8); }
+  /* Un po' piu' d'aria fra il paragrafo e i numeri. */
+  .reviews-section__head { margin-bottom: var(--space-6); }
 }

@@ -474,8 +474,12 @@
           <span class="mask-line"><span class="mask-line__text">Seguici sui social</span></span>
         </h2>
         <p class="ig-feed__follow" data-reveal="stagger" data-reveal-order="1">
+          <!-- Il testo va dentro uno <span>, come in tutte le altre CTA: e'
+               quello che .btn > span solleva sopra il riempimento bianco che
+               scorre in hover. Senza, la tendina ci passa sopra e la scritta
+               sparisce. -->
           <a class="btn btn--accent btn--sm" href="https://www.instagram.com/effegigruppoimmobiliare/"
-             target="_blank" rel="noopener">Seguici su Instagram</a>
+             target="_blank" rel="noopener"><span>Seguici su Instagram</span></a>
         </p>
       </div>
       <p class="social-section__lead" data-reveal="stagger" data-reveal-order="1">
