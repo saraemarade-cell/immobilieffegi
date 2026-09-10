@@ -1905,20 +1905,13 @@ label.check,
   .process-step { padding-block: 6px; }
 }
 
-/* Telefoni con schermo piu' basso (es. 360x740): la fascia dell'immagine
-   si accorcia ancora e le distanze si riducono al minimo, sempre senza
-   toccare i testi. Sotto questa soglia la sezione supera comunque lo
-   schermo, ma di poco. */
-@media (max-width: 639px) and (max-height: 780px) {
-  .manifesto__visual,
-  .process-section__visual { aspect-ratio: 5 / 2; }
-  .manifesto__content,
-  .process-section__content { padding-block: var(--space-2); }
-  .manifesto .section-head,
-  .process-section .section-head { margin-bottom: var(--space-2); }
-  .manifesto-item__trigger,
-  .process-step { padding-block: 4px; }
-}
+/* NOTA: qui esisteva un blocco che comprimeva la sezione sui telefoni
+   "bassi" (soglia sull.altezza del viewport). E. stato rimosso: su Android
+   e iOS l.altezza utile cambia da telefono a telefono e persino mentre si
+   scorre, perche. la barra del browser si ritrae. Una regola legata
+   all.altezza rendeva quindi il mobile diverso da dispositivo a dispositivo
+   e instabile durante lo scorrimento. Ora la versione mobile dipende solo
+   dalla larghezza: uguale ovunque. */
 
 /* ---------- PLAYER SU TABLET E TELEFONO ----------
    Il player ereditava il 4:5 di .video-card, che nel foglio viene DOPO
@@ -1951,7 +1944,7 @@ label.check,
    selezionabili: immagine ed elenco finivano in schermate diverse. Il tetto
    e' espresso in vh, cosi' si adatta da solo a qualunque combinazione di
    larghezza e altezza invece di dipendere da soglie fisse. */
-@media (max-width: 959px) {
+@media (min-width: 640px) and (max-width: 959px) {
   /* width: 100% e. indispensabile accanto al tetto in vh: con il solo
      aspect-ratio, limitare l.altezza faceva RESTRINGERE la larghezza per
      mantenere la proporzione (619px su 753), lasciando una fascia vuota a
@@ -1963,13 +1956,13 @@ label.check,
 
 /* Stesso principio per il player: sotto gli 860px il 16:9 su un viewport
    largo e basso mangiava l'altezza che serve alle miniature. */
-@media (max-width: 859px) {
+@media (min-width: 640px) and (max-width: 859px) {
   .video-card--stage { max-height: 40vh; }
 }
 
 /* Viewport largo ma corto (es. 837x861, tablet in orizzontale): il tetto
    scende ancora, perche' li' l'altezza e' la risorsa scarsa. */
-@media (max-width: 959px) and (max-height: 900px) {
+@media (min-width: 640px) and (max-width: 959px) and (max-height: 900px) {
   .manifesto__visual,
   .process-section__visual { max-height: 41vh; }
 }
@@ -1981,7 +1974,7 @@ label.check,
    Si restituisce respiro dove serve, restando dentro una schermata.
    La soglia min-height tiene fuori i telefoni bassi, che poco sotto
    hanno la regola opposta. */
-@media (max-width: 639px) and (min-height: 781px) {
+@media (max-width: 639px) {
   .reviews-section { padding-block: var(--space-7) var(--space-6); }
   .reviews-section .section-head { margin-bottom: var(--space-5); }
   .reviews-section__head { margin-bottom: var(--space-5); }
@@ -1989,17 +1982,8 @@ label.check,
   .reviews-section__top { padding-bottom: var(--space-5); }
 }
 
-/* Recensioni su telefoni bassi (es. 360x740): la compattazione esisteva
-   solo da 700px in su. Qui si riducono padding e corpo dei numeri perche'
-   testo, video e miniature stiano insieme in una schermata. */
-@media (max-width: 699px) and (max-height: 780px) {
-  .reviews-section { padding-block: var(--space-4) var(--space-3); }
-  .reviews-section__head { margin-bottom: var(--space-2); }
-  .reviews-section .section-head { margin-bottom: var(--space-2); }
-  .reviews-section__top { padding-bottom: var(--space-2); }
-  .stats-col { gap: var(--space-2); }
-  .stat__num { font-size: clamp(28px, 8vw, 36px); }
-}
+/* (Anche la compattazione delle recensioni sui telefoni bassi e. stata
+   rimossa, per lo stesso motivo: dipendeva dall.altezza del viewport.) */
 
 /* Stacco fra paragrafo e feed allineato a quello delle altre sezioni
    (32px misurati, come in "Un pacchetto completo"). Il valore e' maggiore
@@ -2084,7 +2068,7 @@ main h3 { text-wrap: balance; }
    stare tutte in un viewport e' stato allentato di proposito, perche' la
    compressione che serviva a rispettarlo le rendeva soffocate. Qui il
    padding torna a quello delle sezioni normali della pagina. */
-@media (max-width: 639px) and (min-height: 781px) {
+@media (max-width: 639px) {
   /* Chiusura allineata a "Un pacchetto completo" (64px): tutte le sezioni
      lunghe finiscono alla stessa quota dal giunto che le separa. In cima
      il manifesto e "Come funziona" partono con l'immagine a tutta larghezza,
