@@ -13,6 +13,11 @@
   /* Secondary */
   --c-dark-gray: #6B6362;
   --c-light-gray: #AAA39D;
+  /* Il verde resta definito perche' fa parte della palette del brand, ma non
+     e' piu' usato in pagina: ogni elemento che era verde e' ora antracite.
+     Unica eccezione la miniatura video attiva, che sta su fondo antracite e
+     userebbe un colore uguale allo sfondo: li' il segnale e' in avorio, che
+     e' gia' il colore d'accento di quella sezione. */
   --c-green: #1E4B46;
   --c-green-light: #2E635C;
 
@@ -210,9 +215,12 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.
 .btn--primary:hover, .btn--primary:focus-visible { color: var(--c-anthracite); }
 .btn--primary:hover::before, .btn--primary:focus-visible::before { transform: scaleX(1); }
 
-.btn--accent { background: var(--c-green); color: var(--c-white); border-color: var(--c-green); }
+/* Pulsanti in antracite invece che in verde. Cambia solo il colore: resta
+   il riempimento bianco che scorre da sinistra in hover, con il testo che
+   prende il colore del pulsante. */
+.btn--accent { background: var(--c-anthracite); color: var(--c-white); border-color: var(--c-anthracite); }
 .btn--accent::before { background: var(--c-white); }
-.btn--accent:hover, .btn--accent:focus-visible { color: var(--c-green); }
+.btn--accent:hover, .btn--accent:focus-visible { color: var(--c-anthracite); }
 .btn--accent:hover::before, .btn--accent:focus-visible::before { transform: scaleX(1); }
 
 .btn--ghost { background: transparent; color: inherit; --btn-ghost-hover: var(--c-white); }
@@ -256,7 +264,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.
   font-size: 16px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--c-green);
+  color: var(--c-anthracite);
   margin-bottom: var(--space-3);
 }
 
@@ -266,7 +274,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.
   font-weight: 700;
   color: var(--c-anthracite);
 }
-.text-accent { color: var(--c-green); font-style: italic; }
+.text-accent { color: var(--c-anthracite); font-style: italic; }
 
 /* Underline reveal — piccolo blocco verde che cresce sotto il testo */
 [data-reveal="underline"] {
@@ -282,7 +290,7 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.
   bottom: -4px;
   width: 100%;
   height: 3px;
-  background: var(--c-green);
+  background: var(--c-anthracite);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -303,9 +311,9 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   font-family: var(--font-heading);
   font-weight: 900;
   font-size: 16px;
-  color: var(--c-green);
+  color: var(--c-anthracite);
   background: transparent;
-  border: 2px solid var(--c-green);
+  border: 2px solid var(--c-anthracite);
 }
 .num-square--dark { background: var(--c-anthracite); color: var(--c-white); border-color: var(--c-anthracite); }
 .num-square--light { background: var(--c-ivory); color: var(--c-anthracite); border-color: var(--c-ivory); }
@@ -330,7 +338,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   z-index: 2;
 }
 .section-joint--ivory { background: var(--c-ivory); }
-.section-joint--green { background: var(--c-green); }
+.section-joint--green { background: var(--c-anthracite); }
 .section-joint--anthracite { background: var(--c-anthracite); }
 
 /* ---------- HERO ----------
@@ -521,7 +529,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 }
 .field input:not([type="checkbox"])::placeholder { color: var(--c-light-gray); }
 .field input:not([type="checkbox"]):hover { border-color: var(--c-dark-gray); }
-.field input:not([type="checkbox"]):focus { border-color: var(--c-green); border-width: 2px; outline: none; background: var(--c-surface-alt); }
+.field input:not([type="checkbox"]):focus { border-color: var(--c-anthracite); border-width: 2px; outline: none; background: var(--c-surface-alt); }
 .field input:focus-visible { outline: 3px solid var(--c-focus-ring); outline-offset: 1px; }
 .field.has-error input { border-color: var(--c-error); background: var(--c-error-bg); }
 .field__error { display: none; font-size: 16px; color: var(--c-error); margin-top: var(--space-2); }
@@ -589,7 +597,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   left: 0;
   bottom: var(--space-5);
   z-index: 2;
-  background: var(--c-green);
+  background: var(--c-anthracite);
   color: var(--c-white);
   font-size: 16px;
   font-weight: 700;
@@ -637,7 +645,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   top: 0;
   bottom: 0;
   width: 4px;
-  background: var(--c-green);
+  background: var(--c-anthracite);
   transform: scaleY(0);
   transform-origin: top;
   transition: transform var(--dur-base) var(--ease-out);
@@ -660,7 +668,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   color: var(--c-anthracite);
 }
 .manifesto-item__title { font-family: var(--font-heading); font-weight: 700; font-size: 17px; }
-.manifesto-item__trigger:hover .manifesto-item__title { color: var(--c-green); }
+.manifesto-item__trigger:hover .manifesto-item__title { color: var(--c-anthracite); }
 
 /* Segnale di apertura. La barra verde a sinistra dice quale punto e' aperto
    ma non che i punti si possono aprire: serve un indizio prima del clic.
@@ -693,16 +701,16 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .manifesto-item__sign::after { width: 2px; height: 10px; }
 
 /* Aperto: la barra verticale scompare ruotando, restano il meno e il verde. */
-.manifesto-item.is-active .manifesto-item__sign { border-color: var(--c-green); }
-.manifesto-item.is-active .manifesto-item__sign::before { background: var(--c-green); }
+.manifesto-item.is-active .manifesto-item__sign { border-color: var(--c-anthracite); }
+.manifesto-item.is-active .manifesto-item__sign::before { background: var(--c-anthracite); }
 .manifesto-item.is-active .manifesto-item__sign::after {
   opacity: 0;
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
-.manifesto-item__trigger:hover .manifesto-item__sign { border-color: var(--c-green); }
+.manifesto-item__trigger:hover .manifesto-item__sign { border-color: var(--c-anthracite); }
 .manifesto-item__trigger:hover .manifesto-item__sign::before,
-.manifesto-item__trigger:hover .manifesto-item__sign::after { background: var(--c-green); }
+.manifesto-item__trigger:hover .manifesto-item__sign::after { background: var(--c-anthracite); }
 
 @media (prefers-reduced-motion: reduce) {
   .manifesto-item__sign,
@@ -767,7 +775,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   top: 0.45em;
   width: 8px;
   height: 2px;
-  background: var(--c-green);
+  background: var(--c-anthracite);
 }
 
 /* Schermi bassi (portatili 13"/14" a 1280x620-720): il ritmo verticale si
@@ -832,7 +840,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--c-green);
+  background: var(--c-anthracite);
   transform: scaleY(0);
   transform-origin: top;
   transition: transform var(--dur-slow) var(--ease-out);
@@ -863,7 +871,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   transition: background var(--dur-base) var(--ease-standard), color var(--dur-base) var(--ease-standard);
 }
 .process-step__title { font-family: var(--font-heading); font-weight: 700; font-size: 18px; }
-.process-step__trigger:hover .process-step__title { color: var(--c-green); }
+.process-step__trigger:hover .process-step__title { color: var(--c-anthracite); }
 .process-step__text {
   font-size: 16px;
   color: var(--c-dark-gray);
@@ -874,7 +882,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   transition: opacity var(--dur-base) var(--ease-standard);
 }
 .process-step.is-active .process-step__text { opacity: 1; }
-.process-step.is-active .num-square { background: var(--c-green); color: var(--c-white); }
+.process-step.is-active .num-square { background: var(--c-anthracite); color: var(--c-white); }
 
 /* Un'immagine per passo, impilate: la nuova entra con la stessa tendina
    rettangolare usata nel manifesto. */
@@ -1048,7 +1056,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 }
 .video-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .video-thumb:hover, .video-thumb:focus-visible { opacity: 0.85; }
-.video-thumb.is-active { opacity: 1; border-color: var(--c-green); }
+.video-thumb.is-active { opacity: 1; border-color: var(--c-ivory); }
 /* Barra verde piena sul lato: marca la miniatura in riproduzione senza
    affidarsi al solo colore del bordo. */
 .video-thumb.is-active::after {
@@ -1058,7 +1066,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   bottom: 0;
   width: 100%;
   height: 5px;
-  background: var(--c-green);
+  background: var(--c-ivory);
 }
 .video-thumb__n {
   position: absolute;
@@ -1082,7 +1090,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .video-card__play {
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
   width: 56px; height: 56px; display: flex; align-items: center; justify-content: center;
-  background: var(--c-white); color: var(--c-green); font-size: 20px; z-index: 1;
+  background: var(--c-white); color: var(--c-anthracite); font-size: 20px; z-index: 1;
 }
 @media (min-width: 700px) { .video-card__play { width: 72px; height: 72px; font-size: 22px; } }
 .video-card__label { position: absolute; left: var(--space-3); bottom: var(--space-3); z-index: 1; color: var(--c-white); font-size: 16px; font-weight: 700; }
@@ -1231,7 +1239,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   font-size: clamp(22px, 3.2vw, 32px);
   font-weight: 500;
   font-style: italic;
-  color: var(--c-green);
+  color: var(--c-anthracite);
   max-width: 32ch;
 }
 .final-cta__title .mask-line__text { font-size: clamp(30px, 5vw, 50px); color: var(--c-anthracite); }
@@ -1365,7 +1373,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
    sezione: barra da destra -> linietta a destra, e viceversa. */
 .process-section[data-reveal-block]::before,
 .social-section[data-reveal-block]::before { left: auto; right: 0; }
-.final-cta[data-reveal-block]::before { background: var(--c-green); left: 0; right: auto; }
+.final-cta[data-reveal-block]::before { background: var(--c-anthracite); left: 0; right: auto; }
 .process-section[data-reveal-block]::before,
 .reviews-section[data-reveal-block]::before { background: var(--c-ivory); }
 
@@ -1477,7 +1485,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   text-transform: uppercase;
   color: var(--c-anthracite);
   background: var(--c-surface-alt);
-  border-left: 3px solid var(--c-green);
+  border-left: 3px solid var(--c-anthracite);
   padding: var(--space-3) var(--space-4);
   transition: transform var(--dur-fast) var(--ease-standard), background var(--dur-fast) var(--ease-standard);
 }
@@ -1489,12 +1497,12 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   flex: none;
   width: 14px;
   height: 8px;
-  border-left: 3px solid var(--c-green);
-  border-bottom: 3px solid var(--c-green);
+  border-left: 3px solid var(--c-anthracite);
+  border-bottom: 3px solid var(--c-anthracite);
   transform: rotate(-45deg) translateY(-2px);
 }
 
-.package[data-reveal-block]::before { left: auto; right: 0; background: var(--c-green); }
+.package[data-reveal-block]::before { left: auto; right: 0; background: var(--c-anthracite); }
 
 @media (prefers-reduced-motion: reduce) {
   .package__item { transition: none !important; }
@@ -1524,7 +1532,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   border-radius: var(--radius-sm);
   resize: vertical;
 }
-.contact-form textarea:focus { border-color: var(--c-green); border-width: 2px; outline: none; background: var(--c-white); }
+.contact-form textarea:focus { border-color: var(--c-anthracite); border-width: 2px; outline: none; background: var(--c-white); }
 
 .field--check { margin-bottom: var(--space-4); }
 /* Quadratino e testo sulla stessa riga: lo span e. reso block cosi. il suo
@@ -1550,9 +1558,9 @@ label.check input {
   width: var(--check-size);
   height: var(--check-size);
   margin-top: calc((var(--check-line) - var(--check-size)) / 2);
-  accent-color: var(--c-green);
+  accent-color: var(--c-anthracite);
 }
-label.check a { color: var(--c-green); text-decoration: underline; }
+label.check a { color: var(--c-anthracite); text-decoration: underline; }
 
 .contact-form__handoff {
   margin-top: var(--space-4);
@@ -1562,7 +1570,7 @@ label.check a { color: var(--c-green); text-decoration: underline; }
   line-height: 1.45;
   color: var(--c-anthracite);
 }
-.contact-form__handoff a { color: var(--c-green); font-weight: 700; text-decoration: underline; }
+.contact-form__handoff a { color: var(--c-anthracite); font-weight: 700; text-decoration: underline; }
 
 .contact-section[data-reveal-block]::before { background: var(--c-ivory); left: auto; right: 0; }
 
@@ -1621,7 +1629,7 @@ label.check a { color: var(--c-green); text-decoration: underline; }
 /* Asterisco dei campi obbligatori. E' un segno visivo: e' aria-hidden e la
    vera informazione per gli screen reader resta l'attributo required
    sull'input, che viene gia' annunciato. */
-.req { color: var(--c-green); font-weight: 700; }
+.req { color: var(--c-anthracite); font-weight: 700; }
 .form-legend { font-size: 16px; color: var(--c-dark-gray); margin-bottom: var(--space-4); }
 
 /* La linietta laterale parte insieme alla barra della propria sezione:
