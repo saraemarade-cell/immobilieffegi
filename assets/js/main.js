@@ -79,8 +79,8 @@
    * moltiplica per il fattore di zoom e si ancora il centro della lente
    * al punto dell'immagine che le sta esattamente dietro.
    * ------------------------------------------------------------------- */
-  var LENS_IMG_W = 2000;   // dimensioni naturali di residential-facade.jpg
-  var LENS_IMG_H = 1331;
+  var LENS_IMG_W = 1536;   // dimensioni naturali di hero-soggiorno-vista.webp
+  var LENS_IMG_H = 1024;
   var LENS_ZOOM = 2.1;          // fattore di ingrandimento (fisso)
 
   function initHeroLens() {

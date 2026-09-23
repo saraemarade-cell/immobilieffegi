@@ -458,9 +458,9 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   z-index: 0;
   pointer-events: none;
   /* Deve restare la STESSA immagine di .hero__bg img, e LENS_IMG_W/H in
-     main.js devono corrispondere alle sue dimensioni naturali (2000x1331),
+     main.js devono corrispondere alle sue dimensioni naturali (1536x1024),
      altrimenti l'allineamento ottico della lente salta. */
-  background-image: url("../img/stock/residential-facade.jpg");
+  background-image: url("../img/foto/hero-soggiorno-vista.webp");
   background-repeat: no-repeat;
   border: 2px solid rgba(255, 255, 255, 0.75);
 }
