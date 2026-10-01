@@ -47,7 +47,6 @@
 (function () {
   "use strict";
 
-  var LIVE_FORM_URL = "https://immobilieffegi.it/valuta-il-tuo-immobile/#valuta";
   var STORAGE_KEY = "effegi_valuation_v1";
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -55,7 +54,7 @@
     setFooterYear();
     initRevealMotion();
     initHeroLens();
-    initValuationForm();
+    initValuationQuiz();
     initVideoTestimonials();
     initStatCounters();
     initManifestoPillars();
@@ -868,175 +867,354 @@
   }
 
   /* ---------------------------------------------------------------------
-   * CurrentEffegiForm — wrapper dello step 1 nativo + handoff live step 2-3
+   * InteractiveValuationQuiz — quiz di valutazione a 3 pagine.
+   *
+   * Il markup e le classi sono quelli di Gravity Forms (tema Orbital), così
+   * questo comportamento e il CSS che lo veste restano validi quando il form
+   * verra' creato davvero in WordPress. In quel contesto la navigazione fra
+   * le pagine la gestisce Gravity Forms; qui la riproduciamo perche' senza
+   * WordPress non c'e' nessun backend a cui fare POST.
+   *
+   * COSA CAMBIA IN PRODUZIONE (dichiarato, non nascosto):
+   * - il passaggio di pagina lo fa GF: questi handler vanno riagganciati
+   *   agli eventi gform_page_loaded / gform_post_render;
+   * - il salvataggio progressivo a ogni step NON lo fa questo file: lo fa
+   *   Partial Entries Add-On lato server. Qui teniamo solo la copia locale
+   *   in sessionStorage, che serve a non perdere le risposte se l'utente
+   *   ricarica la pagina.
+   * Dettagli e snippet PHP: GRAVITY-FORMS.md
    * ------------------------------------------------------------------- */
-  function initValuationForm() {
-    var root = document.getElementById("current-effegi-form");
+  var QUIZ_STEP_LABELS = ["Il tuo immobile", "Dove si trova", "I tuoi dati"];
+
+  /* Tre schermate, tre step di raccolta dati: la mappa resta perche. rende
+     esplicito il legame e regge se un domani una schermata venisse divisa.
+     Indice = pagina (0-based), valore = step tracciato. */
+  var QUIZ_PAGE_TO_STEP = [1, 2, 3];
+
+  /* Campi che NON devono mai finire nel dataLayer: sono PII. Il tracking
+     riceve solo dati non identificativi (tipologia, superficie, locali,
+     stato, anno) piu' il comune, che era gia' ammesso come dato di
+     localizzazione aggregato. */
+  var QUIZ_PII = ["input_3", "input_4", "input_11", "input_12", "input_13", "input_14"];
+
+  function initValuationQuiz() {
+    var root = document.getElementById("valuation-quiz");
     if (!root) return;
 
-    var step1Panel = root.querySelector('[data-step-panel="1"]');
-    var handoffPanel = root.querySelector('[data-step-panel="2-3"]');
-    var backBtn = root.querySelector("[data-step-back]");
-    var mount = root.querySelector("[data-live-form-mount]");
+    var form = root.querySelector("#gform_1");
+    var pages = Array.prototype.slice.call(root.querySelectorAll(".gform_page"));
+    var bar = root.querySelector("[data-progress-bar]");
+    var currentLabel = root.querySelector(".gf_step_current_page");
+    var stepLabel = root.querySelector("[data-step-label]");
+    var recap = root.querySelector("[data-quiz-recap]");
+    var confirmation = root.querySelector("[data-quiz-confirmation]");
+    var uidField = root.querySelector("[data-lead-uid]");
+    if (!form || !pages.length) return;
 
-    var fields = {
-      comune: step1Panel.querySelector("#v-comune"),
-      indirizzo: step1Panel.querySelector("#v-indirizzo"),
-      civico: step1Panel.querySelector("#v-civico")
-    };
-
-    var state = restoreState();
-    if (state.values) {
-      Object.keys(fields).forEach(function (key) {
-        if (state.values[key]) fields[key].value = state.values[key];
-      });
-    }
-
+    var current = 0;
     var startFired = false;
-    Object.keys(fields).forEach(function (key) {
-      fields[key].addEventListener("focus", function () {
-        if (!startFired) {
-          startFired = true;
-          EffegiTracking.push("valuation_start");
-          markAbandonWatch(true);
-        }
+    var state = restoreQuiz();
+
+    if (!state.uid) state.uid = generateUid();
+    if (uidField) uidField.value = state.uid;
+    if (state.values) restoreValues(state.values);
+
+    /* --- avvio del percorso: prima interazione qualunque essa sia --- */
+    form.addEventListener("focusin", fireStart);
+    form.addEventListener("change", fireStart);
+
+    function fireStart() {
+      if (startFired) return;
+      startFired = true;
+      EffegiTracking.push("valuation_start");
+      markAbandonWatch(true);
+    }
+
+    /* --- card di scelta: tutta la card e' cliccabile, e dove previsto
+           l'avanzamento e' automatico dopo la selezione --- */
+    root.querySelectorAll(".gfield_radio").forEach(function (group) {
+      group.addEventListener("change", function (e) {
+        if (e.target.matches("input[type=radio]")) clearError(e.target.closest(".gfield"));
       });
-      fields[key].addEventListener("input", function () {
-        clearFieldError(fields[key]);
+      if (!group.hasAttribute("data-autoadvance")) return;
+      /* L'avanzamento automatico si aggancia a "click", non a "change":
+         con le frecce della tastiera il change scatta a ogni radio
+         attraversato, e la pagina sarebbe saltata alla prima freccia
+         impedendo di scegliere. Il click arriva da mouse, tocco, Spazio
+         e Invio — cioe' da una scelta deliberata. */
+      group.addEventListener("click", function (e) {
+        if (!e.target.matches("input[type=radio]")) return;
+        // Avanza solo se il resto della pagina e' gia' completo, altrimenti
+        // salterebbe campi ancora vuoti.
+        if (!pageIsValid(pages[current], true)) return;
+        window.setTimeout(function () { goNext(); }, reduceMotion ? 0 : 260);
       });
     });
 
-    step1Panel.addEventListener("submit", function (e) {
+    /* --- pulisci l'errore appena l'utente corregge --- */
+    form.addEventListener("input", function (e) {
+      if (e.target.closest(".gfield")) clearError(e.target.closest(".gfield"));
+    });
+
+    root.querySelectorAll("[data-quiz-next]").forEach(function (b) {
+      b.addEventListener("click", goNext);
+    });
+    root.querySelectorAll("[data-quiz-prev]").forEach(function (b) {
+      b.addEventListener("click", goPrev);
+    });
+
+    form.addEventListener("submit", function (e) {
       e.preventDefault();
-      var valid = true;
-      Object.keys(fields).forEach(function (key) {
-        if (!fields[key].value.trim()) {
-          setFieldError(fields[key], "Campo obbligatorio.");
-          valid = false;
-        }
+      if (!pageIsValid(pages[current])) return;
+
+      /* Nessuna attesa finta. Qui non c'e' un endpoint a cui inviare — in
+         produzione l'invio lo fa Gravity Forms — quindi mezzo secondo di
+         rotella era solo teatro: si vedeva un caricamento che non stava
+         caricando niente. La conferma compare subito.
+         In WordPress il pulsante avra' lo stato di attesa vero di GF, e
+         lead_submit andra' emesso dalla Confirmation del form: solo li' si
+         sa che il lead e' stato davvero scritto. */
+      saveQuiz(3);
+      EffegiTracking.push("valuation_step_3_complete", safePayload());
+      EffegiTracking.push("valuation_form_complete", safePayload());
+      EffegiTracking.push("lead_submit", safePayload());
+      markAbandonWatch(false);
+
+      form.hidden = true;
+      var progress = root.querySelector(".gf_progressbar_wrapper");
+      if (progress) progress.hidden = true;
+      /* La conferma RESTA a tutto schermo: e' la schermata piu' importante
+         del percorso e non deve rimpicciolirsi dentro la hero proprio nel
+         momento in cui arriva. Si esce dal pulsante "Chiudi". */
+      if (confirmation) {
+        var riepilogo = confirmation.querySelector("[data-quiz-done-recap]");
+        if (riepilogo) riepilogo.textContent = buildRecap();
+        confirmation.hidden = false;
+        // Schermata di chiusura in negativo: la marca la stessa classe sul
+        // body, cosi. il pannello puo. cambiare fondo senza :has().
+        document.body.classList.add("is-quiz-done");
+      }
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch (err) { /* ignora */ }
+    });
+
+    /* Chiudere la conferma NON deve lasciare la conferma appesa: il percorso
+       torna com'era prima che iniziasse, pronto per un'altra richiesta.
+       Senza questo, chi chiudeva restava con la schermata di ringraziamento
+       al posto del form e non poteva piu' compilarlo. */
+    root.querySelectorAll("[data-quiz-close]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        azzeraQuiz();
       });
-      if (!valid) return;
-
-      var submitBtn = step1Panel.querySelector('button[type="submit"]');
-      submitBtn.classList.add("btn--loading");
-      submitBtn.disabled = true;
-
-      var values = {
-        comune: fields.comune.value.trim(),
-        indirizzo: fields.indirizzo.value.trim(),
-        civico: fields.civico.value.trim()
-      };
-      persistState({ values: values, step: 2 });
-
-      // Nessuna chiamata di rete reale è disponibile per lo Step 1 in questo
-      // repository (vedi nota in testa al file): il breve delay simula solo
-      // il feedback di caricamento dell'interazione, non una submission reale.
-      setTimeout(function () {
-        submitBtn.classList.remove("btn--loading");
-        submitBtn.disabled = false;
-        goToHandoff(values);
-        EffegiTracking.push("valuation_step_1_complete", { comune: values.comune });
-      }, reduceMotion ? 0 : 420);
     });
 
-    backBtn.addEventListener("click", function () {
-      handoffPanel.hidden = true;
-      step1Panel.hidden = false;
-      persistState({ values: getCurrentValues(), step: 1 });
+    function azzeraQuiz() {
+      document.body.classList.remove("is-quiz-fullscreen");
+      document.body.classList.remove("is-quiz-done");
+      if (confirmation) confirmation.hidden = true;
+      form.hidden = false;
+      var progress = root.querySelector(".gf_progressbar_wrapper");
+      if (progress) progress.hidden = false;
+
+      form.reset();
+      form.querySelectorAll(".gfield").forEach(clearError);
+      state = { uid: generateUid() };
+      if (uidField) uidField.value = state.uid;
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch (err) { /* ignora */ }
+
+      // Il percorso riparte da capo, anche per il tracciamento: la prossima
+      // interazione deve emettere di nuovo valuation_start.
+      startFired = false;
+      showPage(0, true);
+    }
+
+    showPage(state.step ? state.step - 1 : 0, true);
+    // Se si passa da telefono a desktop (rotazione, finestra ridimensionata)
+    // il quiz deve uscire dalla modalita. a tutto schermo da se..
+    if (window.matchMedia("(max-width: 639px)").addEventListener) {
+      window.matchMedia("(max-width: 639px)").addEventListener("change", syncFullscreen);
+    }
+
+    /* ------------------------------ navigazione --------------------- */
+    function goNext() {
+      if (!pageIsValid(pages[current])) return;
+      saveQuiz(current + 1);
+      // Lo step tracciato non coincide con la pagina: vedi QUIZ_PAGE_TO_STEP.
+      // Si emette solo quando si LASCIA l.ultima pagina di quello step, per
+      // non contare due volte lo stesso gruppo di informazioni.
+      var step = QUIZ_PAGE_TO_STEP[current];
+      if (QUIZ_PAGE_TO_STEP[current + 1] !== step) {
+        EffegiTracking.push("valuation_step_" + step + "_complete", safePayload());
+      }
+      if (current < pages.length - 1) showPage(current + 1);
+    }
+
+    function goPrev() {
+      if (current > 0) showPage(current - 1);
+    }
+
+    /* Su telefono il quiz si prende tutta la pagina appena si esce dalla
+       prima domanda: lo step 2 da solo e' piu' alto del viewport, e dentro
+       il pannello della hero non ci starebbe mai. Tornando alla prima
+       domanda la hero riappare: l'utente non resta intrappolato. */
+    /* Dichiarata come funzione, non come var: showPage la chiama anche al
+       primo giro, che avviene prima di questa riga. Con una var sarebbe
+       ancora undefined e l'inizializzazione si fermerebbe qui. */
+    function syncFullscreen() {
+      // Vale su tutti i dispositivi: anche su desktop lo step 2 non entra
+      // nella schermata se il pannello deve convivere con titolo e promessa.
+      var attivo = current > 0;
+      document.body.classList.toggle("is-quiz-fullscreen", attivo);
+    }
+
+    /* Esc chiude il percorso a tutto schermo tornando alla domanda
+       precedente: su un pannello che copre lo schermo serve sempre
+       una via d'uscita da tastiera. */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && document.body.classList.contains("is-quiz-fullscreen")) goPrev();
     });
 
-    if (state.step === 2 && state.values) {
-      goToHandoff(state.values, true);
-    }
+    function showPage(index, silent) {
+      current = Math.max(0, Math.min(index, pages.length - 1));
+      pages.forEach(function (p, i) { p.style.display = i === current ? "" : "none"; });
+      syncFullscreen();
 
-    function getCurrentValues() {
-      return {
-        comune: fields.comune.value.trim(),
-        indirizzo: fields.indirizzo.value.trim(),
-        civico: fields.civico.value.trim()
-      };
-    }
+      var pct = Math.round(((current + 1) / pages.length) * 100);
+      // I segmenti sono l'avanzamento che si vede; il testo percentuale resta
+      // per chi usa uno screen reader.
+      var segmenti = root.querySelectorAll(".gf_progressbar_seg");
+      segmenti.forEach(function (s, i) { s.classList.toggle("is-done", i <= current); });
+      if (bar) bar.textContent = pct + "% completato";
+      if (currentLabel) currentLabel.textContent = String(current + 1);
+      if (stepLabel) stepLabel.textContent = QUIZ_STEP_LABELS[current] || "";
 
-    function goToHandoff(values, silent) {
-      handoffPanel.querySelector('[data-recap="comune"]').textContent = values.comune || "—";
-      handoffPanel.querySelector('[data-recap="indirizzo"]').textContent = values.indirizzo || "—";
-      handoffPanel.querySelector('[data-recap="civico"]').textContent = values.civico || "—";
-
-      step1Panel.hidden = true;
-      handoffPanel.hidden = false;
-      mountLiveForm(mount);
+      if (current === pages.length - 1 && recap) recap.textContent = buildRecap();
 
       if (!silent) {
-        handoffPanel.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+        var first = pages[current].querySelector("input:not([type=hidden]), select");
+        if (first && first.type !== "radio") first.focus({ preventScroll: true });
       }
     }
 
-    function setFieldError(input, msg) {
-      var field = input.closest(".field");
-      field.classList.add("has-error");
-      field.querySelector(".field__error").textContent = msg;
-      input.setAttribute("aria-invalid", "true");
-    }
-    function clearFieldError(input) {
-      var field = input.closest(".field");
-      field.classList.remove("has-error");
-      input.removeAttribute("aria-invalid");
+    /* ------------------------------ validazione --------------------- */
+    function pageIsValid(page, quiet) {
+      var ok = true;
+      page.querySelectorAll(".gfield").forEach(function (gfield) {
+        if (!gfield.classList.contains("gfield_contains_required")) return;
+        var radios = gfield.querySelectorAll("input[type=radio]");
+        var filled;
+        if (radios.length) {
+          filled = Array.prototype.some.call(radios, function (r) { return r.checked; });
+        } else {
+          var input = gfield.querySelector("input, select");
+          if (!input) return;
+          filled = input.type === "checkbox" ? input.checked : !!input.value.trim();
+          if (filled && input.type === "email") filled = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(input.value.trim());
+          if (filled && input.type === "tel") filled = input.value.replace(/\D/g, "").length >= 6;
+        }
+        if (!filled) {
+          ok = false;
+          if (!quiet) setError(gfield, messageFor(gfield));
+        }
+      });
+      return ok;
     }
 
-    function persistState(partial) {
+    function messageFor(gfield) {
+      var input = gfield.querySelector("input, select");
+      if (input && input.type === "email" && input.value.trim()) return "Controlla l’indirizzo email.";
+      if (input && input.type === "tel" && input.value.trim()) return "Controlla il numero di telefono.";
+      if (input && input.type === "checkbox") return "Serve il consenso per procedere.";
+      return "Campo obbligatorio.";
+    }
+
+    function setError(gfield, msg) {
+      gfield.classList.add("gfield_error");
+      var box = gfield.querySelector(".gfield_validation_message");
+      if (box) { box.textContent = msg; box.hidden = false; }
+      var input = gfield.querySelector("input, select");
+      if (input) input.setAttribute("aria-invalid", "true");
+    }
+
+    function clearError(gfield) {
+      if (!gfield) return;
+      gfield.classList.remove("gfield_error");
+      var box = gfield.querySelector(".gfield_validation_message");
+      if (box) { box.hidden = true; box.textContent = ""; }
+      gfield.querySelectorAll("[aria-invalid]").forEach(function (el) { el.removeAttribute("aria-invalid"); });
+    }
+
+    /* ------------------------------ stato e payload ------------------ */
+    function collect() {
+      var out = {};
+      form.querySelectorAll("input, select").forEach(function (el) {
+        if (!el.name) return;
+        if (el.type === "radio") { if (el.checked) out[el.name] = el.value; return; }
+        if (el.type === "checkbox") { out[el.name] = el.checked ? "1" : ""; return; }
+        out[el.name] = el.value;
+      });
+      return out;
+    }
+
+    function restoreValues(values) {
+      Object.keys(values).forEach(function (name) {
+        var els = form.querySelectorAll('[name="' + name + '"]');
+        els.forEach(function (el) {
+          if (el.type === "radio") { el.checked = el.value === values[name]; return; }
+          if (el.type === "checkbox") { el.checked = values[name] === "1"; return; }
+          el.value = values[name];
+        });
+      });
+    }
+
+    /* Payload di tracking: si esclude esplicitamente ogni campo PII. */
+    function safePayload() {
+      var v = collect();
+      return {
+        tipologia: v.input_1 || undefined,
+        comune: v.input_2 || undefined,
+        superficie_mq: v.input_6 || undefined,
+        anno_costruzione: v.input_7 || undefined,
+        locali: v.input_8 || undefined,
+        stato: v.input_9 || undefined
+      };
+    }
+
+    function buildRecap() {
+      var v = collect();
+      var parti = [v.input_1, v.input_2, v.input_6 ? v.input_6 + " mq" : "", v.input_8 ? v.input_8 + " locali" : ""];
+      return parti.filter(Boolean).join(" · ");
+    }
+
+    function saveQuiz(step) {
       try {
-        var current = restoreState();
-        var next = Object.assign({}, current, partial);
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify({
+          uid: state.uid, step: step, values: collect()
+        }));
       } catch (err) { /* storage non disponibile: degradazione silenziosa */ }
     }
-    function restoreState() {
+
+    function restoreQuiz() {
       try {
         var raw = sessionStorage.getItem(STORAGE_KEY);
         return raw ? JSON.parse(raw) : {};
-      } catch (err) {
-        return {};
-      }
+      } catch (err) { return {}; }
+    }
+
+    function generateUid() {
+      if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+      return "eff-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
     }
   }
 
   /* ---------------------------------------------------------------------
-   * Mount lazy dell'iframe live (Step 2-3) — nessun impatto sulle
-   * performance above-the-fold: viene istanziato solo dopo l'azione utente.
-   * ------------------------------------------------------------------- */
-  function mountLiveForm(mount) {
-    if (!mount || mount.querySelector("iframe")) return;
-
-    var iframe = document.createElement("iframe");
-    iframe.src = LIVE_FORM_URL;
-    iframe.title = "Modulo di valutazione Effegi Gruppo Immobiliare — passi 2 e 3";
-    iframe.loading = "lazy";
-    iframe.referrerPolicy = "strict-origin-when-cross-origin";
-
-    iframe.addEventListener("load", function () {
-      var skeleton = mount.querySelector("[data-live-form-skeleton]");
-      if (skeleton) skeleton.remove();
-      // Proxy di interazione: quando il focus passa dentro l'iframe cross-origin,
-      // il documento padre riceve "blur" con document.activeElement === iframe.
-      // È l'unico segnale di engagement disponibile senza un bridge postMessage
-      // lato WordPress; non equivale a un vero step_2_complete/step_3_complete.
-      window.addEventListener("blur", function onBlur() {
-        if (document.activeElement === iframe) {
-          EffegiTracking.push("valuation_step_2_complete", { note: "heuristic_iframe_focus" });
-          window.removeEventListener("blur", onBlur);
-        }
-      });
-    });
-
-    mount.appendChild(iframe);
-  }
-
-  /* ---------------------------------------------------------------------
-   * Abbandono — logica dichiarata (brief §17):
-   * - "abandon" viene valutato SOLO se l'utente ha già interagito col form
-   *   (valuation_start emesso) e NON ha ancora completato lo Step 1.
-   * - Si aggancia a `visibilitychange` (hidden) e `pagehide`, non a un
-   *   semplice reload/refresh, ed è idempotente per sessione (un solo evento).
+   * Abbandono:
+   * - viene valutato SOLO se l'utente ha già iniziato il quiz (valuation_start
+   *   emesso) e NON lo ha portato a termine — markAbandonWatch(false) viene
+   *   chiamato all'invio, quindi chi completa non genera mai l'evento;
+   * - l'evento porta con sé lo step raggiunto, così il team ADV vede DOVE si
+   *   perde il funnel; lo step è un numero, non un dato personale;
+   * - si aggancia a `visibilitychange` (hidden) e `pagehide`, non a un
+   *   semplice reload, ed è idempotente per sessione (un solo evento).
    * ------------------------------------------------------------------- */
   var abandonState = { watching: false, reported: false };
 
@@ -1046,14 +1224,13 @@
 
   function maybeReportAbandon() {
     if (!abandonState.watching || abandonState.reported) return;
-    var reachedStep2 = false;
+    var step = 1;
     try {
       var raw = sessionStorage.getItem(STORAGE_KEY);
-      reachedStep2 = raw && JSON.parse(raw).step === 2;
-    } catch (err) { /* storage non disponibile: trattiamo come non completato */ }
-    if (reachedStep2) return; // ha completato almeno lo step 1: non è abbandono
+      if (raw) step = JSON.parse(raw).step || 1;
+    } catch (err) { /* storage non disponibile: si assume il primo step */ }
     abandonState.reported = true;
-    EffegiTracking.push("valuation_abandon");
+    EffegiTracking.push("valuation_abandon", { ultimo_step: step });
   }
 
   document.addEventListener("visibilitychange", function () {

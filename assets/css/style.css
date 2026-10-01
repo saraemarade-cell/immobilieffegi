@@ -24,7 +24,10 @@
   /* Functional (minimal, non-brand) */
   --c-error: #B3261E;
   --c-error-bg: #FBEAE8;
-  --c-focus-ring: #1E4B46;
+  /* Era il verde del brand, rimasto acceso quando tutto il resto e. passato
+     all.antracite: l.anello di focus era l.ultimo elemento verde della
+     pagina. Ora e. antracite come il resto. */
+  --c-focus-ring: #2B3131;
 
   /* Surfaces derived from primary/secondary only */
   --c-surface: var(--c-white);
@@ -76,6 +79,7 @@
      la barra di transizione E l'header sticky, che e' opaco e coprirebbe
      proprio la barra. Senza questa sottrazione la linea di transizione
      finisce dietro l'header e non si vede mai insieme alla sua sezione. */
+  --section-h: calc(100vh - var(--joint-h) - var(--header-h));
   --section-h: calc(100dvh - var(--joint-h) - var(--header-h));
 }
 @media (min-width: 640px) {
@@ -87,7 +91,7 @@
 
 /* ---------- RESET ---------- */
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: smooth; }
 body {
   margin: 0;
   font-family: var(--font-body);
@@ -223,8 +227,17 @@ h1, h2, h3 { font-family: var(--font-heading); font-weight: 700; line-height: 1.
 .btn--accent:hover, .btn--accent:focus-visible { color: var(--c-anthracite); }
 .btn--accent:hover::before, .btn--accent:focus-visible::before { transform: scaleX(1); }
 
-.btn--ghost { background: transparent; color: inherit; --btn-ghost-hover: var(--c-white); }
-.btn--ghost::before { background: currentColor; }
+/* Il riempimento NON puo' essere currentColor: in hover il colore del testo
+   e' gia' diventato --btn-ghost-hover (bianco), quindi la tendina si
+   dipingeva bianca su fondo bianco e il pulsante spariva. Serve un colore
+   esplicito, indipendente dallo stato del testo. */
+.btn--ghost {
+  background: transparent;
+  color: inherit;
+  --btn-ghost-fill: var(--c-anthracite);
+  --btn-ghost-hover: var(--c-white);
+}
+.btn--ghost::before { background: var(--btn-ghost-fill); }
 .btn--ghost:hover, .btn--ghost:focus-visible { color: var(--btn-ghost-hover); }
 .btn--ghost:hover::before, .btn--ghost:focus-visible::before { transform: scaleX(1); }
 
@@ -460,7 +473,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
   /* Deve restare la STESSA immagine di .hero__bg img, e LENS_IMG_W/H in
      main.js devono corrispondere alle sue dimensioni naturali (1536x1024),
      altrimenti l'allineamento ottico della lente salta. */
-  background-image: url("../img/foto/hero-soggiorno-vista.webp");
+  background-image: url("../imgdev/Foto1Hero.webp");
   background-repeat: no-repeat;
   border: 2px solid rgba(255, 255, 255, 0.75);
 }
@@ -552,6 +565,239 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .valuation-recap dd { font-weight: 700; font-size: 16px; color: var(--c-anthracite); word-break: break-word; }
 
 .live-form-mount { border: 1px solid var(--c-border); min-height: 320px; margin-bottom: var(--space-4); position: relative; background: var(--c-white); }
+
+/* =================================================================
+   QUIZ DI VALUTAZIONE — stile sulle classi di Gravity Forms
+   =================================================================
+   Tutte le regole qui sotto colpiscono classi generate da Gravity Forms
+   (tema Orbital, GF 2.9), non classi nostre: gform_wrapper, gform_page,
+   gfield, ginput_container, gchoice, gform_page_footer, gf_progressbar.
+   E' una scelta precisa: quando il form verra' creato in WordPress questo
+   foglio continuera' a funzionare senza riscritture.
+
+   LIMITI DI GRAVITY FORMS DA TENERE PRESENTI:
+   · il markup non e' modificabile: si stila quello che GF genera;
+   · il tema Orbital porta un suo CSS che va o sovrascritto o disattivato
+     (Impostazioni form -> Form Theme, oppure il filtro gform_disable_css);
+   · le variabili --gf-* del CSS API si dichiarano su
+     .gform-theme--framework, che e' lo scope dove GF le consuma;
+   · le "card" cliccabili non sono un tipo di campo: sono radio button di
+     cui si stila la <label> dentro .gchoice.
+   ================================================================= */
+
+/* Ponte fra la palette Effegi e il CSS API di Gravity Forms: cosi' anche
+   quello che non ristiliamo a mano esce gia' con i colori giusti. */
+.gform-theme--framework {
+  --gf-color-primary: var(--c-anthracite);
+  --gf-color-primary-contrast: var(--c-white);
+  --gf-color-secondary: var(--c-surface-alt);
+  --gf-color-out-ctrl-light-darker: var(--c-border);
+  --gf-color-out-ctrl-dark: var(--c-dark-gray);
+  --gf-color-danger: var(--c-error);
+  --gf-radius: var(--radius-sm);
+  --gf-font-size-primary: 16px;
+  --gf-font-size-secondary: 16px;
+}
+
+/* ---------- barra di avanzamento ---------- */
+.gf_progressbar_wrapper { margin-bottom: var(--space-4); }
+.gf_progressbar_title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-dark-gray);
+  margin-bottom: var(--space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-2);
+  align-items: baseline;
+}
+.gf_progressbar_step_label { color: var(--c-anthracite); }
+.gf_progressbar {
+  height: 6px;
+  background: var(--c-border);
+  overflow: hidden;
+}
+.gf_progressbar_percentage {
+  display: block;
+  height: 100%;
+  background: var(--c-anthracite);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gf_progressbar_percentage { transition: none; }
+}
+.screen-reader-text {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------- griglia dei campi ----------
+   GF assegna a ogni campo una classe di larghezza (gfield--width-half,
+   --two-thirds, --one-third...): qui diventa una griglia a 12 colonne,
+   che su telefono collassa a colonna unica. Mobile first, come da brief. */
+.gform_fields {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-3);
+}
+.gfield { grid-column: 1 / -1; min-width: 0; }
+@media (min-width: 480px) {
+  .gfield--width-half { grid-column: span 6; }
+  .gfield--width-one-third { grid-column: span 4; }
+  .gfield--width-two-thirds { grid-column: span 8; }
+}
+
+.gfield_label {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--c-anthracite);
+  margin-bottom: var(--space-2);
+}
+.gfield_required_asterisk { color: var(--c-error); margin-left: 2px; }
+
+/* ---------- campi di testo, numero, select ---------- */
+.ginput_container input[type="text"],
+.ginput_container input[type="email"],
+.ginput_container input[type="tel"],
+.ginput_container input[type="number"],
+.ginput_container select {
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-white);
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 16px; /* sotto i 16px iOS ingrandisce la pagina al focus */
+  color: var(--c-anthracite);
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              background var(--dur-fast) var(--ease-standard);
+}
+.ginput_container input::placeholder { color: var(--c-light-gray); }
+.ginput_container input:hover,
+.ginput_container select:hover { border-color: var(--c-dark-gray); }
+.ginput_container input:focus,
+.ginput_container select:focus {
+  border-color: var(--c-anthracite);
+  border-width: 2px;
+  outline: none;
+  background: var(--c-surface-alt);
+}
+.ginput_container input:focus-visible,
+.ginput_container select:focus-visible {
+  outline: 3px solid var(--c-focus-ring);
+  outline-offset: 1px;
+}
+/* Via le frecce dal campo numerico: su mobile rubano spazio e non servono,
+   c'e' gia' la tastiera numerica. */
+.ginput_container_number input::-webkit-outer-spin-button,
+.ginput_container_number input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ginput_container_number input[type="number"] { -moz-appearance: textfield; }
+
+/* ---------- card di scelta (radio stilati) ----------
+   Il quadratino nativo sparisce ma resta nel DOM e resta raggiungibile da
+   tastiera: e' lui a ricevere il focus, e la card mostra l'anello. */
+.gfield_radio--cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-2);
+}
+.gfield_radio--compact { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.gfield_radio--cards .gchoice { margin: 0; min-width: 0; }
+.gfield_radio--cards input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.gfield_radio--cards label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 56px;
+  padding: var(--space-3) var(--space-2);
+  background: var(--c-white);
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--c-anthracite);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              background var(--dur-fast) var(--ease-standard);
+}
+.gfield_radio--cards label:hover { border-color: var(--c-dark-gray); background: var(--c-surface-alt); }
+.gfield_radio--cards input:checked + label {
+  border-color: var(--c-anthracite);
+  border-width: 2px;
+  background: var(--c-anthracite);
+  color: var(--c-white);
+  font-weight: 700;
+}
+.gfield_radio--cards input:focus-visible + label {
+  outline: 3px solid var(--c-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ---------- consenso ---------- */
+.ginput_container_consent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+.ginput_container_consent input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  accent-color: var(--c-anthracite);
+}
+.gfield_consent_label { font-size: 16px; line-height: 1.45; color: var(--c-dark-gray); }
+.gfield_consent_label a { color: var(--c-anthracite); text-decoration: underline; }
+
+/* ---------- errori ---------- */
+.gfield_validation_message {
+  font-size: 16px;
+  color: var(--c-error);
+  margin-top: var(--space-2);
+}
+.gfield_error input,
+.gfield_error select { border-color: var(--c-error); background: var(--c-error-bg); }
+.gfield_error .gfield_radio--cards label { border-color: var(--c-error); }
+
+/* ---------- piede della pagina: Indietro a sinistra, Avanti a destra ---- */
+.gform_page_footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.gform_page_footer .gform_next_button,
+.gform_page_footer .gform_button { margin-left: auto; }
+/* Sulla prima pagina non c'e' "Indietro": il pulsante prende tutta la
+   larghezza, che su telefono e' il bersaglio piu' comodo. */
+.gform_page_footer .btn--block { margin-left: 0; width: 100%; }
+.gform_page_footer .form-card__legal { flex-basis: 100%; margin-top: 0; }
+/* (La disposizione dei pulsanti su telefono e. definita piu. avanti, in un
+   blocco unico: affiancarli sotto i 420px e lasciarli a capo sopra creava
+   proprio il comportamento incoerente da eliminare.) */
+
+/* ---------- riepilogo sull'ultima pagina ---------- */
+.quiz-recap {
+  font-size: 16px;
+  color: var(--c-dark-gray);
+  padding: var(--space-3);
+  background: var(--c-surface-alt);
+  border-left: 3px solid var(--c-anthracite);
+}
+.quiz-recap:empty { display: none; }
+
+/* ---------- conferma ---------- */
+.gform_confirmation_message { font-size: 16px; color: var(--c-dark-gray); line-height: 1.5; }
+.gform_confirmation_wrapper[hidden] { display: none; }
 .live-form-mount iframe { width: 100%; min-height: 640px; border: 0; display: block; }
 .live-form-mount__skeleton { padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
 .skeleton-line {
@@ -781,16 +1027,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 /* Schermi bassi (portatili 13"/14" a 1280x620-720): il ritmo verticale si
    stringe ancora, così la sezione e la sua barra di transizione continuano
    a stare insieme in un viewport. Si agisce solo sulle distanze. */
-@media (min-width: 960px) and (max-height: 760px) {
-  .manifesto__content,
-  .process-section__content { padding-block: var(--space-4); }
-  .manifesto .section-head,
-  .process-section .section-head { margin-bottom: var(--space-3); }
-  .manifesto__lead { margin-bottom: var(--space-2); padding-bottom: var(--space-2); }
-  .manifesto-item__trigger { padding-block: 6px; }
-  .manifesto-usp { margin-top: var(--space-2); }
-  .process-step { padding-block: var(--space-2); }
-}
+/* (Compattazione a viewport basso rimossa: vedi "SCHERMI ZOOMATI" in fondo.) */
 
 /* ---------- PROCESS SECTION ("Come funziona") ----------
    Sfondo chiaro (ivory-tint): un quadrato verde/antracite su sfondo
@@ -1322,7 +1559,7 @@ h3[data-reveal="underline"] { display: block; font-size: 21px; margin-bottom: va
 .is-visible[data-reveal="fade"] { opacity: 1; transition: opacity var(--dur-base) var(--ease-standard); }
 
 /* Wipe mask — rettangolo che attraversa l'elemento per il reveal (immagini) */
-[data-reveal="wipe"] { position: relative; overflow: clip; }
+[data-reveal="wipe"] { position: relative; overflow: hidden; overflow: clip; }
 [data-reveal="wipe"]::after {
   content: "";
   position: absolute;
@@ -1578,18 +1815,7 @@ label.check a { color: var(--c-anthracite); text-decoration: underline; }
    Ultimo scalino di compattazione perche' la sezione e la sua barra di
    transizione restino insieme sotto l'header. Si toccano solo distanze e
    dimensioni dei quadrati numerati, mai il corpo del testo. */
-@media (min-width: 960px) and (max-height: 700px) {
-  .manifesto__content,
-  .process-section__content { padding-block: var(--space-3); }
-  .manifesto .section-head,
-  .process-section .section-head { margin-bottom: var(--space-2); }
-  .manifesto__lead { margin-bottom: var(--space-2); padding-bottom: var(--space-1); }
-  .manifesto-item__trigger { padding-block: 4px; }
-  .manifesto-item.is-active .manifesto-item__panel > p { padding-bottom: var(--space-2); }
-  .process-step { padding-block: var(--space-1); }
-  .process-step .num-square { width: 44px; height: 44px; font-size: 16px; }
-  .process-step__text { margin-top: var(--space-1); padding-left: calc(44px + var(--space-4)); }
-}
+/* (Compattazione a viewport basso rimossa: vedi "SCHERMI ZOOMATI" in fondo.) */
 
 /* Nome/Cognome/Email/Telefono: griglia a colonne uguali, cosi' i quattro
    campi hanno esattamente la stessa larghezza. */
@@ -1970,10 +2196,7 @@ label.check,
 
 /* Viewport largo ma corto (es. 837x861, tablet in orizzontale): il tetto
    scende ancora, perche' li' l'altezza e' la risorsa scarsa. */
-@media (min-width: 640px) and (max-width: 959px) and (max-height: 900px) {
-  .manifesto__visual,
-  .process-section__visual { max-height: 41vh; }
-}
+/* (Tetto 41vh sulle immagini rimosso: vedi "SCHERMI ZOOMATI" in fondo.) */
 
 /* Recensioni su telefoni di altezza normale (390x844 e simili): qui lo
    spazio c'e' e la sezione non deve stare stretta. Misurato prima: il
@@ -2090,4 +2313,1762 @@ main h3 { text-wrap: balance; }
   .social-section { padding-block: var(--space-8); }
   /* Un po' piu' d'aria fra il paragrafo e i numeri. */
   .reviews-section__head { margin-bottom: var(--space-6); }
+}
+
+/* =================================================================
+   RECENSIONI GOOGLE — contenitore del widget
+   =================================================================
+   In WordPress il contenuto di .reviews-grid lo genera il widget Google
+   Reviews di Elementor Pro. Qui si definisce solo la griglia che lo
+   ospita, cosi' il widget eredita il ritmo della pagina invece di
+   portarsi dietro il proprio.
+   ================================================================= */
+.reviews-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-inline: auto;
+  max-width: var(--container-w);
+  padding-inline: var(--gutter);
+}
+@media (min-width: 640px) { .reviews-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 960px) { .reviews-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); } }
+
+.reviews-grid__pending {
+  grid-column: 1 / -1;
+  font-size: 16px;
+  color: var(--c-light-gray);
+  padding: var(--space-6) var(--space-4);
+  border: 1px dashed var(--c-dark-gray);
+  text-align: center;
+}
+/* Nota della simulazione: discreta ma sempre leggibile. E' legata al
+   segnaposto, non alla sezione, quindi sparisce da se' quando il widget
+   riempira' la griglia con le recensioni vere. */
+.reviews-grid__note {
+  grid-column: 1 / -1;
+  margin: 0 0 var(--space-1);
+  font-size: 16px;
+  font-style: italic;
+  color: var(--c-light-gray);
+}
+
+.review-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--c-white);
+  min-width: 0;
+}
+.review-card__head { display: flex; align-items: center; gap: var(--space-3); }
+.review-card__avatar {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-anthracite);
+  color: var(--c-white);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+}
+.review-card__who { display: flex; flex-direction: column; min-width: 0; }
+.review-card__name { font-weight: 700; font-size: 16px; color: var(--c-anthracite); }
+.review-card__date { font-size: 16px; color: var(--c-light-gray); }
+.review-card__stars { margin: 0; font-size: 18px; letter-spacing: 0.1em; color: var(--c-anthracite); }
+.review-card__text { margin: 0; font-size: 16px; line-height: 1.5; color: var(--c-dark-gray); }
+
+/* Domanda in testa alla schermata del quiz: sulle pagine che raccolgono più
+   campi dello stesso argomento, il titolo della domanda sta sopra i campi e
+   li tiene insieme come un'unica richiesta. */
+.quiz-question {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(18px, 2.4vw, 21px);
+  color: var(--c-anthracite);
+  margin: 0;
+}
+.form-card__legal--left { text-align: left; margin-top: 0; }
+
+/* =================================================================
+   STEP 1 — la domanda d'ingresso
+   =================================================================
+   La prima schermata ha una sola domanda e niente altro. Le card sono
+   righe piene invece che riquadri affiancati: il bersaglio e' largo
+   quanto il pannello, si colpisce col pollice senza mirare, e la lista
+   si legge in verticale come una domanda a risposta multipla. E' il
+   meccanismo della reference, non la sua grafica: forme squadrate,
+   palette Effegi, nessuna icona presa in prestito.
+   ================================================================= */
+.gform_page[data-quiz-page="1"] .gfield_label { font-size: 18px; margin-bottom: var(--space-2); }
+.gform_page[data-quiz-page="1"] .gfield_radio--cards { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label {
+  justify-content: flex-start;
+  text-align: left;
+  min-height:  56px;
+  padding-inline: var(--space-4);
+  font-size: 17px;
+}
+/* La freccia appare al passaggio e alla selezione: segnala che la scelta
+   fa avanzare, senza aggiungere un pulsante. */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label::after {
+  content: "\2192";
+  margin-left: auto;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--dur-fast) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-standard);
+}
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label:hover::after,
+.gform_page[data-quiz-page="1"] .gfield_radio--cards input:checked + label::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label::after { transition: none; }
+}
+
+/* Sottodomanda dentro uno step che raccoglie due gruppi di informazioni. */
+.quiz-question--sub { margin-top: var(--space-3); }
+
+/* =================================================================
+   HERO DENTRO LA PRIMA SCHERMATA (telefono)
+   =================================================================
+   Misurato a 393x745: la hero arrivava a 774px, 29 oltre la piega, e la
+   riga legale finiva tagliata. Su una landing a traffico a pagamento la
+   prima schermata deve contenere tutto — occhiello, titolo, promessa,
+   domanda e le quattro risposte — senza chiedere di scorrere.
+   Si comprime solo l'aria: nessun testo tolto, nessun corpo sotto i 16px.
+   ================================================================= */
+@media (max-width: 639px) {
+  .hero__panel--glass { padding: var(--space-4); }
+  .hero__inner { --hero-pad: max(var(--space-3), calc(var(--lens-y) + var(--space-1))); }
+  .hero__title { margin-bottom: var(--space-2); line-height: 1.08; }
+  .hero__lead { margin-bottom: var(--space-2); }
+  .eyebrow--band { margin-bottom: var(--space-2); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-3); }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label { min-height: 52px; }
+  .gform_page[data-quiz-page="1"] .gform_page_footer { margin-top: var(--space-3); }
+}
+
+/* Telefoni bassi (360x640 e simili): la hero sforava di 101px. Si stringe
+   ancora, compresi header e corpo del titolo — che è un titolo, non testo
+   da leggere, quindi può scendere sotto i 16px di regola del body. */
+@media (max-width: 639px) and (max-height: 700px) {
+  :root { --header-h: 72px; }
+  .site-header__logo img { width: 56px; height: 56px; }
+  .hero__panel--glass { padding: var(--space-3); }
+  .hero__title { font-size: 24px; }
+  .hero__lead { line-height: 1.3; margin-bottom: var(--space-1); }
+  .eyebrow--band { margin-bottom: var(--space-1); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-2); }
+  .gform_page[data-quiz-page="1"] .gfield_label { font-size: 17px; margin-bottom: var(--space-1); }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards { gap: 6px; }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label { min-height: 46px; }
+  .gform_page[data-quiz-page="1"] .gform_page_footer { margin-top: var(--space-2); }
+}
+
+/* =================================================================
+   HERO DENTRO LA PRIMA SCHERMATA (tablet e desktop)
+   =================================================================
+   La compattazione mobile non bastava: misurata a 1265x860 la hero
+   arrivava a 955px, 95 oltre la piega. Il pannello vetro su schermi
+   larghi aveva 64px di padding verticale, pensati quando conteneva un
+   form corto; con il quiz serve meno aria e piu' contenuto visibile.
+   Anche qui si tocca solo la spaziatura.
+   ================================================================= */
+@media (min-width: 560px) {
+  .hero__panel--glass { padding: var(--space-6) var(--space-7); }
+}
+@media (min-width: 640px) {
+  .hero__title { margin-bottom: var(--space-2); }
+  .hero__lead { margin-bottom: var(--space-2); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-3); }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label { min-height: 52px; }
+}
+
+/* Portatili bassi (1366x768 e simili): l'altezza e' la risorsa scarsa,
+   si stringe ancora senza toccare i testi. */
+@media (min-width: 640px) and (max-height: 820px) {
+  .hero__panel--glass { padding: var(--space-5) var(--space-6); }
+  .hero__lead { margin-bottom: var(--space-1); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-2); }
+  .gform_page[data-quiz-page="1"] .gfield_label { margin-bottom: var(--space-2); }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards { gap: 6px; }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label { min-height: 48px; }
+  .gform_page[data-quiz-page="1"] .gform_page_footer { margin-top: var(--space-2); }
+}
+
+/* La cornice della lente detta il respiro della hero: --hero-pad non puo'
+   scendere sotto --lens-y + un margine, altrimenti la cornice tocca il bordo
+   della sezione. Su schermi bassi si stringe la cornice e con lei il
+   respiro, recuperando l'altezza che serve al quiz. */
+@media (min-width: 640px) and (max-height: 900px) {
+  .hero__inner { --lens-y: 24px; --hero-pad: max(var(--space-4), calc(var(--lens-y) + var(--space-2))); }
+}
+@media (min-width: 640px) and (max-height: 820px) {
+  :root { --header-h: 88px; }
+  .hero__inner { --lens-y: 20px; }
+}
+
+/* =================================================================
+   QUIZ A TUTTO SCHERMO (telefono)
+   =================================================================
+   Misurato a 393x745: lo step 1 sta in 305px, ma lo step 2 ne chiede 909
+   e il 3 ne chiede 586. Dentro il pannello della hero — che porta con se'
+   occhiello, titolo e promessa per 265px — non ci stanno.
+
+   Appena l'utente entra nel percorso, il quiz si prende tutta la pagina:
+   spariscono le parti della hero che hanno gia' fatto il loro lavoro
+   (convincere a iniziare) e restano solo avanzamento, domanda e pulsanti.
+   L'avanzamento resta ancorato in alto e i pulsanti in basso: qualunque
+   cosa succeda al contenuto, chi compila vede sempre a che punto e' e
+   come proseguire.
+   ================================================================= */
+@media (max-width: 639px) {
+  body.is-quiz-fullscreen { overflow: hidden; }
+
+  /* Catena di contenitori: ogni anello deve essere una griglia con
+     min-height 0, altrimenti il figlio scorrevole non sa quanto e' alto
+     e la pagina torna a crescere invece di scorrere al suo interno. */
+  .is-quiz-fullscreen .hero__panel--glass {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    width: auto;
+    max-width: none;
+    border: 0;
+    background: var(--c-white);
+    padding: calc(var(--space-3) + env(safe-area-inset-top, 0px)) var(--space-4)
+             calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+  }
+  .is-quiz-fullscreen .hero__panel-content,
+  .is-quiz-fullscreen .form-card,
+  .is-quiz-fullscreen .form-card__body,
+  .is-quiz-fullscreen #gform_1 {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .is-quiz-fullscreen .gform_wrapper {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+  }
+  .is-quiz-fullscreen .gform-body { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+
+  /* Fuori dal campo visivo cio. che serviva solo a far partire il quiz. */
+  .is-quiz-fullscreen .eyebrow--band,
+  .is-quiz-fullscreen .hero__title,
+  .is-quiz-fullscreen .hero__lead,
+  .is-quiz-fullscreen .lens-layer { display: none; }
+
+  /* La pagina attiva: campi che scorrono, piede fermo in fondo. */
+  .is-quiz-fullscreen .gform_page {
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 0;
+  }
+  .is-quiz-fullscreen .gform_page[style*="display: none"] { display: none; }
+  .is-quiz-fullscreen .gform_page:not([style*="display: none"]) { display: grid; }
+  .is-quiz-fullscreen .gform_page_fields {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    min-height: 0;
+    padding-bottom: var(--space-1);
+  }
+  .is-quiz-fullscreen .gform_page_footer {
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--c-border);
+  }
+
+  /* Indirizzo e civico affiancati anche su telefono: due campi corti su
+     due righe sprecavano 76px che allo step 2 servono. */
+  .gfield--width-two-thirds { grid-column: span 8; }
+  .gfield--width-one-third { grid-column: span 4; }
+}
+
+/* A tutto schermo lo step 2 chiedeva ancora 734px contro i 595 disponibili:
+   139px di scorrimento interno. Qui si stringe quel tanto che basta perche'
+   anche la domanda piu' lunga stia in una schermata senza scorrere. I campi
+   restano sopra i 44px di area toccabile e i testi sopra i 16px. */
+@media (max-width: 639px) {
+  .is-quiz-fullscreen .gform_fields { gap: var(--space-2); }
+  .is-quiz-fullscreen .gfield_label { margin-bottom: var(--space-1); }
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 48px; padding-block: var(--space-2); }
+  .is-quiz-fullscreen .gfield_radio--cards { gap: 6px; }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 48px; }
+  .is-quiz-fullscreen .quiz-question { font-size: 18px; }
+  .is-quiz-fullscreen .quiz-question--sub { margin-top: var(--space-1); }
+}
+
+/* Ultimi 45px dello step 2. La prima sottodomanda ("Dove si trova?") a
+   tutto schermo dice la stessa cosa dell'etichetta nella barra di
+   avanzamento, appena sopra: si toglie la ripetizione, non l'informazione.
+   La seconda ("Com'è fatto?") resta, perché lì il gruppo cambia davvero. */
+@media (max-width: 639px) {
+  .is-quiz-fullscreen .quiz-question:not(.quiz-question--sub) { display: none; }
+  .is-quiz-fullscreen .gform_fields { gap: 6px; }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 44px; }
+}
+
+/* Il quiz prende davvero tutta la pagina: l'header sparisce mentre si
+   compila. Serviva l'altezza — lo step 2 chiede 597px di campi e con la
+   barra in cima ne restavano 498 — ma e' anche la cosa giusta da fare:
+   durante la compilazione l'unica azione utile e' finire il percorso, e la
+   CTA dell'header porterebbe solo fuori strada. Logo e CTA tornano appena
+   si torna indietro o si arriva alla conferma.
+   Il pannello ha data-reveal: senza azzerare la trasformazione resterebbe
+   spostato di 16px anche da fisso. */
+@media (max-width: 639px) {
+  .is-quiz-fullscreen .site-header { display: none; }
+  .is-quiz-fullscreen .hero__panel--glass {
+    /* Anche la transizione va spenta: una transizione in corso vince sul
+       !important, quindi senza questa riga il pannello puo. restare
+       bloccato a meta. comparsa mentre diventa a tutto schermo. */
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* =================================================================
+   OGNI PASSO DEL QUIZ STA NELLA VIEWPORT — ANCHE SUI TELEFONI BASSI
+   =================================================================
+   A 360x640 il passo 2 chiedeva 617px contro 493 disponibili. Il grosso
+   dello spreco era che superficie e anno si impilavano invece di stare
+   affiancati: sotto i 480px la regola di larghezza non si applicava.
+   ================================================================= */
+@media (max-width: 639px) {
+  /* Mezza larghezza affiancata anche sui telefoni stretti: due campi
+     corti su due righe costavano 68px per niente. */
+  .is-quiz-fullscreen .gfield--width-half { grid-column: span 6; }
+}
+
+@media (max-width: 639px) and (max-height: 700px) {
+  /* Schermi bassi: si toglie anche la seconda sottodomanda (il gruppo si
+     capisce dai campi) e si scende al minimo su altezze e interlinee,
+     restando sopra i 44px di area toccabile e i 16px di corpo testo. */
+  .is-quiz-fullscreen .quiz-question--sub { display: none; }
+  .is-quiz-fullscreen .gform_fields { gap: 4px; }
+  .is-quiz-fullscreen .gfield_label { margin-bottom: 2px; line-height: 1.2; }
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 44px; }
+  .is-quiz-fullscreen .gfield_radio--cards { gap: 4px; }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 40px; padding-block: var(--space-1); }
+  .is-quiz-fullscreen .quiz-recap { padding: var(--space-2); }
+  .is-quiz-fullscreen .gform_page_footer { margin-top: var(--space-2); padding-top: var(--space-2); }
+  .is-quiz-fullscreen .gf_progressbar_wrapper { margin-bottom: var(--space-2); }
+}
+
+/* =================================================================
+   IL QUIZ STA NELLA VIEWPORT ANCHE SU TABLET E DESKTOP
+   =================================================================
+   Misurato a 1265x860: lo step 1 stava (860), ma lo step 2 portava la hero
+   a 1249px e il 3 a 987. Qui il pannello non puo' piu' crescere oltre lo
+   spazio disponibile: avanzamento ancorato in alto, pulsanti in basso,
+   campi al centro. Stessa struttura del telefono, senza coprire la pagina.
+   ================================================================= */
+@media (min-width: 640px) {
+  .hero__panel--glass {
+    max-height: calc(100vh - var(--header-h) - 2 * var(--hero-pad));
+    max-height: calc(100dvh - var(--header-h) - 2 * var(--hero-pad));
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+  }
+  .hero__panel-content,
+  .form-card,
+  .form-card__body,
+  #gform_1 {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    min-height: 0;
+  }
+  .gform_wrapper { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; }
+  .gform-body { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+  .gform_page:not([style*="display: none"]) {
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 0;
+  }
+  .gform_page_fields { overflow-y: auto; min-height: 0; }
+  /* Quattro figli: occhiello, titolo, promessa e il form. I primi tre
+     restano alla loro altezza naturale, il form prende cio. che resta. */
+  .hero__panel-content { grid-template-rows: auto auto auto minmax(0, 1fr); }
+}
+
+/* =================================================================
+   MODALITÀ QUIZ — VALE SU TUTTI I DISPOSITIVI
+   =================================================================
+   Su desktop il contenimento da solo non bastava: il pannello resta alto
+   860 ma i campi dello step 2 eccedono di 389px, perché occhiello, titolo
+   e promessa si mangiano 200px e il pannello è stretto.
+
+   Quindi il quiz si prende la schermata anche su desktop, come nella
+   reference: appena si entra nel percorso restano avanzamento, domanda e
+   pulsanti. Il pannello si allarga e i campi vanno su due colonne, che è
+   l'altro modo di guadagnare altezza quando la larghezza abbonda.
+   ================================================================= */
+@media (min-width: 640px) {
+  .is-quiz-fullscreen .site-header { display: none; }
+  .is-quiz-fullscreen .hero__bg,
+  .is-quiz-fullscreen .lens-layer,
+  .is-quiz-fullscreen .eyebrow--band,
+  .is-quiz-fullscreen .hero__title,
+  .is-quiz-fullscreen .hero__lead { display: none; }
+
+  .is-quiz-fullscreen .hero__inner { padding: 0; }
+  .is-quiz-fullscreen .hero__lens-wrap { max-width: none; }
+
+  .is-quiz-fullscreen .hero__panel--glass {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    border: 0;
+    background: var(--c-white);
+    padding: var(--space-6) var(--space-7);
+    transition: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  /* Il contenuto resta incolonnato al centro: a tutta larghezza le righe
+     di campi diventerebbero lunghissime e illeggibili. */
+  .is-quiz-fullscreen .hero__panel-content {
+    grid-template-rows: minmax(0, 1fr);
+    width: 100%;
+    max-width: 760px;
+    margin-inline: auto;
+  }
+  .is-quiz-fullscreen .gform_page_fields { overflow-y: auto; }
+}
+
+/* =================================================================
+   IL PANNELLO A TUTTO SCHERMO NON DEVE ESSERE RITAGLIATO
+   =================================================================
+   Difetto trovato a schermo: il pannello risultava alto 860px come la
+   viewport, ma il bianco si fermava a 752 — esattamente il bordo inferiore
+   della hero — e sotto spuntava la sezione successiva con i pulsanti
+   appoggiati sopra.
+
+   Due cause insieme:
+   · .hero ha overflow: hidden per la fotografia di sfondo;
+   · body ha overflow-x: clip (serve a impedire lo scorrimento laterale),
+     e "clip" ritaglia anche i discendenti in position: fixed.
+   Mentre il quiz è a tutto schermo entrambi vanno sospesi. Il blocco dello
+   scorrimento di fondo arriva con overflow: hidden sul body, che serviva
+   comunque: su desktop la pagina dietro scorreva ancora.
+   ================================================================= */
+body.is-quiz-fullscreen { overflow: hidden; overflow-x: hidden; }
+.is-quiz-fullscreen .hero { overflow: visible; }
+
+/* Il pannello vive dentro .hero__inner, che ha z-index: 1 e quindi crea un
+   contesto di impilamento: il suo z-index 60 vale solo LI. DENTRO, e la
+   sezione successiva — l'immagine del manifesto, z-index 2 — gli finiva
+   sopra coprendo la fascia bassa. Si alza l'intero contesto, non il
+   pannello: alzare solo lui non servirebbe a niente. */
+.is-quiz-fullscreen .hero { position: relative; z-index: 100; }
+.is-quiz-fullscreen .hero__inner { z-index: 100; }
+
+/* =================================================================
+   VESTE DEL QUIZ
+   =================================================================
+   Il percorso era un modulo nudo: nessuna gerarchia, nessun accento di
+   marca, la domanda con lo stesso peso delle etichette dei campi. Qui si
+   danno ordine e carattere SENZA aggiungere altezza — il vincolo che
+   ogni passo stia nella schermata resta il più importante.
+   ================================================================= */
+
+/* --- testata: nome del passo a sinistra, contatore a destra --- */
+.gf_progressbar_title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.gf_progressbar_step_label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-dark-gray);
+}
+.gf_progressbar_count {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--c-anthracite);
+  white-space: nowrap;
+}
+.gf_progressbar_sep { color: var(--c-light-gray); margin-inline: 1px; }
+.gf_step_page_count { color: var(--c-light-gray); }
+
+/* --- avanzamento a segmenti --- */
+.gf_progressbar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 4px;
+  height: 4px;
+  background: none;
+  overflow: visible;
+}
+.gf_progressbar_seg {
+  display: block;
+  height: 100%;
+  background: var(--c-border);
+  transition: background var(--dur-base) var(--ease-standard);
+}
+.gf_progressbar_seg.is-done { background: var(--c-anthracite); }
+@media (prefers-reduced-motion: reduce) { .gf_progressbar_seg { transition: none; } }
+
+/* --- la domanda è l'elemento principale della schermata --- */
+.gform_page[data-quiz-page="1"] .gfield_label,
+.quiz-question {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(20px, 2.6vw, 26px);
+  line-height: 1.2;
+  color: var(--c-anthracite);
+  letter-spacing: -0.01em;
+}
+/* L'asterisco non deve gridare accanto a una domanda grande. */
+.gform_page[data-quiz-page="1"] .gfield_required_asterisk { display: none; }
+
+/* --- card: barra d'accento a sinistra, come i punti del manifesto --- */
+.gfield_radio--cards label { position: relative; overflow: hidden; }
+.gfield_radio--cards label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--c-ivory);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.gfield_radio--cards label:hover::before { transform: scaleX(1); }
+.gfield_radio--cards input:checked + label::before {
+  background: var(--c-ivory);
+  transform: scaleX(1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .gfield_radio--cards label::before { transition: none; }
+}
+
+/* --- schermata di chiusura --- */
+.gform_confirmation_wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--space-3);
+  height: 100%;
+  max-width: 46ch;
+  margin-inline: auto;
+}
+/* La spunta e. disegnata, non un carattere: stessa mano dei chevron dei
+   pulsanti, e non dipende dal font installato. */
+.quiz-done__mark {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  background: var(--c-anthracite);
+  flex: none;
+}
+.quiz-done__mark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 20px;
+  margin: -12px 0 0 -6px;
+  border: solid var(--c-ivory);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+.quiz-done__title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(24px, 3.4vw, 34px);
+  line-height: 1.15;
+  color: var(--c-anthracite);
+  margin: 0;
+}
+.gform_confirmation_message { font-size: 17px; line-height: 1.5; color: var(--c-dark-gray); margin: 0; }
+.quiz-done__next { list-style: none; display: grid; gap: var(--space-2); margin: 0; padding: 0; }
+.quiz-done__next li {
+  position: relative;
+  padding-left: var(--space-4);
+  font-size: 16px;
+  color: var(--c-anthracite);
+}
+.quiz-done__next li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 8px;
+  height: 8px;
+  background: var(--c-ivory);
+}
+.quiz-done__aside { font-size: 16px; color: var(--c-light-gray); margin: 0; }
+.quiz-done__aside a { color: var(--c-anthracite); text-decoration: underline; }
+
+/* --- piede: "Indietro" discreto, "Continua" pieno --- */
+.gform_page_footer .gform_previous_button { border-color: var(--c-border); }
+.gform_page_footer .gform_previous_button:hover { border-color: var(--c-anthracite); }
+
+/* Campi affiancati: se un'etichetta va a capo e l'altra no, i due riquadri
+   si disallineano. Incolonnando il campo e spingendo il controllo in fondo,
+   gli input restano sulla stessa linea comunque vada l'etichetta. */
+.gfield { display: flex; flex-direction: column; }
+.gfield .ginput_container { margin-top: auto; }
+
+/* =================================================================
+   DUE AZIONI, DUE PESI DIVERSI
+   =================================================================
+   "Indietro" e "Continua" non possono diventare lo stesso rettangolo
+   antracite al passaggio del mouse: sono un ripensamento e un impegno,
+   e devono restare distinguibili. Il secondario perde del tutto la
+   tendina e si limita a schiarire il fondo e a scurire il bordo.
+   ================================================================= */
+.gform_page_footer .gform_previous_button {
+  border-width: 1px;
+  border-color: var(--c-border);
+  color: var(--c-dark-gray);
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.gform_page_footer .gform_previous_button::before { display: none; }
+.gform_page_footer .gform_previous_button:hover,
+.gform_page_footer .gform_previous_button:focus-visible {
+  background: var(--c-surface-alt);
+  border-color: var(--c-dark-gray);
+  color: var(--c-anthracite);
+}
+
+/* --- chevron disegnato, non un glifo di testo --- */
+.gform_previous_button > span::before,
+.gform_next_button > span::after {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  vertical-align: 1px;
+}
+.gform_previous_button > span::before {
+  transform: rotate(-135deg);
+  margin-right: var(--space-2);
+}
+.gform_next_button > span::after {
+  transform: rotate(45deg);
+  margin-left: var(--space-2);
+  transition: transform var(--dur-fast) var(--ease-standard),
+              margin-left var(--dur-fast) var(--ease-standard);
+}
+.gform_next_button:hover > span::after { margin-left: calc(var(--space-2) + 3px); }
+@media (prefers-reduced-motion: reduce) {
+  .gform_next_button > span::after { transition: none; }
+}
+
+/* =================================================================
+   CARD DELLA PRIMA DOMANDA — indice numerato come nel manifesto
+   =================================================================
+   Il quadrato col numero è la stessa figura dei punti "01 02 03" del
+   manifesto: lega il quiz al resto della pagina invece di lasciarlo un
+   modulo anonimo. Il numero lo genera un contatore CSS, così resta
+   corretto anche se le risposte cambiano.
+   ================================================================= */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards { counter-reset: opzione; }
+.gform_page[data-quiz-page="1"] .gchoice { counter-increment: opzione; }
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label {
+  gap: var(--space-3);
+  padding-left: var(--space-2);
+}
+/* Il ::before qui non è più la barra d'accento ma il quadrato numerato:
+   l'accento diventa un'ombra interna, che non occupa un pseudo-elemento. */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label::before {
+  content: counter(opzione, decimal-leading-zero);
+  position: static;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-surface-alt);
+  color: var(--c-dark-gray);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 14px;
+  transform: none;
+  transition: background var(--dur-fast) var(--ease-standard),
+              color var(--dur-fast) var(--ease-standard);
+}
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label:hover::before {
+  background: var(--c-ivory);
+  color: var(--c-anthracite);
+}
+.gform_page[data-quiz-page="1"] .gfield_radio--cards input:checked + label::before {
+  background: var(--c-ivory);
+  color: var(--c-anthracite);
+}
+/* Accento laterale come ombra interna: vale su tutte le card. */
+.gfield_radio--cards label { box-shadow: inset 0 0 0 0 var(--c-ivory); transition: box-shadow var(--dur-fast) var(--ease-standard), border-color var(--dur-fast) var(--ease-standard), background var(--dur-fast) var(--ease-standard); }
+.gfield_radio--cards label:hover { box-shadow: inset 4px 0 0 0 var(--c-ivory); }
+.gfield_radio--cards input:checked + label { box-shadow: inset 4px 0 0 0 var(--c-ivory); }
+@media (prefers-reduced-motion: reduce) {
+  .gfield_radio--cards label { transition: none; }
+}
+
+/* --- la freccia sulle card della prima domanda, disegnata --- */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  margin-right: var(--space-2);
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg) translateX(-3px);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-standard),
+              transform var(--dur-fast) var(--ease-standard);
+}
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label:hover::after,
+.gform_page[data-quiz-page="1"] .gfield_radio--cards input:checked + label::after {
+  opacity: 1;
+  transform: rotate(45deg) translateX(0);
+}
+
+/* --- i campi di testo prendono un accento in basso quando sono attivi --- */
+.ginput_container input:focus,
+.ginput_container select:focus { box-shadow: inset 0 -3px 0 0 var(--c-ivory); }
+
+/* La conferma occupa la schermata come le domande: è l'ultimo passo del
+   percorso, non una nota a margine. Dentro .gform_wrapper è il terzo
+   figlio, quindi in modalità a tutto schermo la griglia deve prevederlo:
+   senza questa riga finiva in una riga implicita fuori dall'area visibile. */
+.is-quiz-fullscreen .gform_wrapper { grid-template-rows: auto minmax(0, 1fr) auto; }
+.is-quiz-fullscreen .gform_wrapper > .gform_confirmation_wrapper { grid-row: 1 / -1; }
+.quiz-done__close { margin-top: var(--space-2); }
+
+/* Il contenimento assegna display: grid a form, wrapper e pagine. Un
+   selettore di classe batte la regola di base [hidden] del browser, quindi
+   il form restava visibile SOTTO la conferma: si vedevano le due schermate
+   sovrapposte. Qui [hidden] torna a valere su tutto il quiz. */
+#valuation-quiz [hidden],
+#valuation-quiz[hidden] { display: none !important; }
+
+/* =================================================================
+   STATO SELEZIONATO — più sobrio
+   =================================================================
+   Riempire la card di antracite pieno con testo bianco era un blocco nero
+   pesante, soprattutto nella riga compatta dei locali. La scelta fatta si
+   riconosce meglio con pochi segni netti: bordo antracite doppio, fondo
+   appena tinto, testo in grassetto, barra avorio a sinistra e una spunta a
+   destra. Nessuna inversione di colore.
+   ================================================================= */
+.gfield_radio--cards input:checked + label {
+  background: var(--c-surface-alt);
+  border-color: var(--c-anthracite);
+  border-width: 2px;
+  color: var(--c-anthracite);
+  font-weight: 700;
+}
+.gfield_radio--cards input:checked + label::after {
+  content: "";
+  width: 6px;
+  height: 11px;
+  margin-left: auto;
+  border: solid var(--c-anthracite);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -2px);
+  opacity: 1;
+}
+/* Nella riga compatta dei locali la spunta non ci sta: lì basta il bordo. */
+.gfield_radio--compact input:checked + label::after { display: none; }
+
+/* La prima domanda ha già la freccia: quando è selezionata resta lei. */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards input:checked + label::after {
+  width: 8px;
+  height: 8px;
+  border-width: 2px 2px 0 0;
+  border-color: currentColor;
+  transform: rotate(45deg);
+  margin-right: var(--space-2);
+}
+
+/* =================================================================
+   RITMO VERTICALE DEL QUIZ
+   =================================================================
+   Le domande erano separate da 4-6px: sembravano un unico blocco. Qui si
+   torna a un respiro leggibile fra un gruppo e l'altro, recuperando
+   l'altezza dove non serve — le sottodomande, che il nome del passo in
+   cima già riassume, e il divisore sopra i pulsanti.
+   ================================================================= */
+@media (max-width: 639px) {
+  /* Niente riga di separazione sopra la CTA: il vuoto basta a staccare. */
+  .is-quiz-fullscreen .gform_page_footer {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: var(--space-4);
+  }
+  /* Le sottodomande ripetono quello che dice l'etichetta del passo. */
+  .is-quiz-fullscreen .quiz-question { display: none; }
+  /* Respiro fra una domanda e l'altra; etichetta e campo restano vicini,
+     così si legge che appartengono l'una all'altro. */
+  .is-quiz-fullscreen .gform_fields { gap: var(--space-4); }
+  .is-quiz-fullscreen .gfield_label { margin-bottom: var(--space-2); }
+}
+@media (max-width: 639px) and (max-height: 700px) {
+  .is-quiz-fullscreen .gform_fields { gap: var(--space-3); }
+  .is-quiz-fullscreen .gfield_label { margin-bottom: var(--space-1); }
+}
+
+/* La domanda ingrandita e i quadrati numerati hanno fatto crescere la prima
+   schermata: a 360x640 la hero passava da 640 a 692. Sugli schermi bassi la
+   domanda torna a una misura che sta in una riga sola e i quadrati si
+   stringono. Il vincolo della viewport viene prima dell'effetto. */
+@media (max-width: 639px) and (max-height: 700px) {
+  .gform_page[data-quiz-page="1"] .gfield_label { font-size: 18px; }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label {
+    min-height: 42px;
+    font-size: 16px;
+    gap: var(--space-2);
+  }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label::before {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+}
+
+/* Schermi minuscoli (320x568, iPhone SE di prima generazione). Qui non
+   basta stringere: la prima schermata sforava di 151px. Sparisce il
+   paragrafo di promessa sotto il titolo — l'unico testo che si ripete,
+   perche' la stessa cosa la dicono gia' l'occhiello in cima
+   ("Valutazione immobiliare gratuita") e la riga in fondo
+   ("Gratuita, confidenziale e senza impegno"). */
+@media (max-width: 400px) and (max-height: 620px) {
+  .hero__lead { display: none; }
+  .hero__panel--glass { padding: var(--space-2); }
+  .hero__title { font-size: 22px; }
+  .gform_page[data-quiz-page="1"] .gfield_label { font-size: 17px; }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label { min-height: 38px; }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label::before { width: 24px; height: 24px; }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards { gap: 4px; }
+  .form-card__legal { margin-top: var(--space-1); }
+  .is-quiz-fullscreen .gform_fields { gap: var(--space-2); }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 38px; }
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 42px; }
+}
+
+/* =================================================================
+   UN SOLO CONTORNO ALLA VOLTA
+   =================================================================
+   Cliccando una card si vedevano due cornici: il bordo doppio dello stato
+   selezionato e, staccato di 2px, l'anello di focus — che su radio e
+   checkbox Chrome mostra anche al clic di mouse, non solo da tastiera.
+   Due riquadri concentrici su un elemento già scuro sono rumore.
+
+   Quando la card è selezionata l'anello sparisce: lo stato è già dichiarato
+   da bordo, fondo, barra avorio e spunta, e non serve raddoppiarlo. Il
+   focus da tastiera su una card NON selezionata continua a mostrarlo, che è
+   il caso in cui serve davvero per capire dove si è.
+   ================================================================= */
+.gfield_radio--cards input:focus-visible:checked + label { outline: none; }
+/* Sulla card non selezionata l'anello resta, ma aderente al bordo invece
+   che staccato: una cornice sola, non due. */
+.gfield_radio--cards input:focus-visible + label {
+  outline-width: 2px;
+  outline-offset: 0;
+}
+
+/* =================================================================
+   CAMPI DI TESTO: UNA CORNICE SOLA AL FOCUS
+   =================================================================
+   Stesso difetto delle card, in un altro punto. Al focus il campo fa già
+   tre cose: il bordo passa da 1,5px chiaro a 2px antracite, il fondo si
+   tinge e compare il filo avorio in basso. Sopra tutto questo arrivava
+   anche l'anello globale :focus-visible, staccato di 2px — e si vedevano
+   due rettangoli concentrici con un vuoto in mezzo.
+
+   L'anello resta (serve nelle modalità a contrasto forzato, dove i colori
+   dell'autore vengono sostituiti) ma con offset negativo: si disegna sopra
+   il bordo invece che fuori, quindi a schermo la cornice è una sola.
+   ================================================================= */
+.ginput_container input:focus-visible,
+.ginput_container select:focus-visible,
+.field input:focus-visible,
+.contact-form input:focus-visible,
+.contact-form textarea:focus-visible {
+  outline: 2px solid var(--c-focus-ring);
+  outline-offset: -2px;
+}
+
+/* =================================================================
+   FRECCIA DEL MENU A TENDINA
+   =================================================================
+   La freccia nativa del select Chrome la disegna appoggiata al bordo
+   destro, ignorando il padding: restava incollata alla cornice. Qui si
+   spegne l'aspetto nativo e si disegna la nostra, con lo stesso chevron
+   dei pulsanti e la stessa distanza dal bordo del testo a sinistra.
+   ================================================================= */
+.ginput_container_select { position: relative; }
+.ginput_container_select select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: calc(var(--space-4) + 18px);
+}
+/* La freccia non deve intercettare i clic: il bersaglio resta il select. */
+.ginput_container_select::after {
+  content: "";
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin-top: -6px;
+  border-right: 2px solid var(--c-dark-gray);
+  border-bottom: 2px solid var(--c-dark-gray);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.ginput_container_select:hover::after { border-color: var(--c-anthracite); }
+
+/* --- schermata di chiusura: gerarchia --- */
+.quiz-done__eyebrow {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--c-dark-gray);
+}
+.gform_confirmation_wrapper .quiz-done__title { margin-top: calc(-1 * var(--space-2)); }
+/* Riepilogo di quello che è stato inviato: fa da ricevuta. */
+.quiz-done__recap {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-surface-alt);
+  border-left: 4px solid var(--c-ivory);
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--c-anthracite);
+}
+.quiz-done__recap:empty { display: none; }
+.quiz-done__aside { line-height: 1.5; }
+
+/* =================================================================
+   SCHERMATA DI CHIUSURA IN NEGATIVO
+   =================================================================
+   Su fondo bianco la conferma restava un foglietto di appunti in mezzo al
+   vuoto: stesso colore del modulo appena compilato, quindi nessuno stacco,
+   e tutta l'attenzione su una spunta piccola. Qui la schermata si ribalta
+   sull'antracite — la stessa superficie scura che la pagina usa già per i
+   numeri e le recensioni. Il passaggio da chiaro a scuro È il segnale che
+   qualcosa si è concluso, prima ancora di leggere le parole.
+   ================================================================= */
+.is-quiz-done .hero__panel--glass { background: var(--c-anthracite); }
+
+.is-quiz-done .gform_confirmation_wrapper {
+  gap: var(--space-4);
+  max-width: 34rem;
+}
+
+/* Il blocco avorio pieno è l'accento più forte che il brand abbia: qui
+   regge da solo la parte alta della schermata. */
+.is-quiz-done .quiz-done__mark {
+  width: 64px;
+  height: 64px;
+  background: var(--c-ivory);
+}
+.is-quiz-done .quiz-done__mark::after {
+  width: 13px;
+  height: 24px;
+  margin: -14px 0 0 -7px;
+  border-color: var(--c-anthracite);
+  border-width: 0 4px 4px 0;
+}
+
+.is-quiz-done .quiz-done__eyebrow { color: var(--c-ivory); }
+.is-quiz-done .quiz-done__title {
+  color: var(--c-white);
+  font-size: clamp(30px, 5vw, 44px);
+  letter-spacing: -0.02em;
+}
+.is-quiz-done .gform_confirmation_message {
+  color: var(--c-light-gray);
+  font-size: clamp(17px, 2vw, 19px);
+  max-width: 34ch;
+}
+.is-quiz-done .gform_confirmation_message strong { color: var(--c-white); }
+
+/* Riepilogo come ricevuta: filetto avorio e fondo appena schiarito. */
+.is-quiz-done .quiz-done__recap {
+  background: rgba(255, 255, 255, 0.07);
+  border-left-color: var(--c-ivory);
+  color: var(--c-white);
+  font-size: 17px;
+}
+.is-quiz-done .quiz-done__aside { color: var(--c-light-gray); }
+.is-quiz-done .quiz-done__aside strong { color: var(--c-ivory); }
+.is-quiz-done .quiz-done__aside a { color: var(--c-white); }
+
+/* Sul fondo scuro il pulsante antracite sparirebbe: diventa avorio pieno. */
+.is-quiz-done .quiz-done__close {
+  background: var(--c-ivory);
+  border-color: var(--c-ivory);
+  color: var(--c-anthracite);
+  margin-top: var(--space-3);
+}
+.is-quiz-done .quiz-done__close::before { background: var(--c-white); }
+.is-quiz-done .quiz-done__close:hover,
+.is-quiz-done .quiz-done__close:focus-visible { color: var(--c-anthracite); }
+.is-quiz-done .quiz-done__close:focus-visible { outline-color: var(--c-white); }
+
+/* Su schermi alti la schermata respira di più senza uscire dalla viewport. */
+@media (min-height: 700px) {
+  .is-quiz-done .gform_confirmation_wrapper { gap: var(--space-5); }
+}
+
+/* =================================================================
+   PULSANTI DEL QUIZ SU TELEFONO — SEMPRE NELLO STESSO POSTO
+   =================================================================
+   Il piede era una riga con andata a capo automatica: a seconda della
+   larghezza dei due testi e dello schermo, "Indietro" finiva ora accanto a
+   "Continua", ora sopra di lui. Stesso percorso, disposizione diversa da un
+   passo all'altro — ed è proprio l'incoerenza il difetto.
+
+   Qui la riga diventa una colonna: "Indietro" sta SEMPRE sopra e allineato
+   a sinistra, l'azione principale sotto a tutta larghezza, che su telefono
+   è anche il bersaglio più comodo per il pollice. Niente più a capo
+   automatico, quindi niente più variazioni.
+   ================================================================= */
+@media (max-width: 639px) {
+  .gform_page_footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+  /* Secondario: compatto e a sinistra, non deve pesare quanto l'azione. */
+  .gform_page_footer .gform_previous_button {
+    align-self: flex-start;
+    width: auto;
+    min-height: 36px;
+    margin-left: 0;
+    padding: var(--space-1) var(--space-3);
+    border: 0;
+  }
+  .gform_page_footer .gform_previous_button:hover,
+  .gform_page_footer .gform_previous_button:focus-visible { background: var(--c-surface-alt); }
+  /* Principale: sempre a tutta larghezza, sempre in fondo. */
+  .gform_page_footer .gform_next_button,
+  .gform_page_footer .gform_button {
+    width: 100%;
+    margin-left: 0;
+    flex: none;
+  }
+  .gform_page_footer .form-card__legal { order: 3; }
+}
+
+/* Impilare i pulsanti costa altezza: lo step 2 tornava a sforare di 1px.
+   Si recupera dallo stacco sopra il piede, dove non si nota. */
+@media (max-width: 639px) {
+  .is-quiz-fullscreen .gform_page_footer { margin-top: var(--space-3); }
+}
+
+/* =================================================================
+   SCHERMATA DI CHIUSURA — TUTTO CENTRATO
+   =================================================================
+   Il blocco era allineato a sinistra come il resto del percorso, ma qui non
+   c'è più niente da compilare: è una schermata di arrivo, e un asse
+   centrale la chiude meglio. Il filetto laterale del riepilogo sparisce —
+   su un blocco centrato un bordo su un lato solo lo sbilancia — e lascia il
+   posto a una cornice avorio sottile su tutti i lati.
+   ================================================================= */
+.is-quiz-done .gform_confirmation_wrapper {
+  align-items: center;
+  text-align: center;
+}
+.is-quiz-done .gform_confirmation_message { max-width: 32ch; }
+.is-quiz-done .quiz-done__recap {
+  border-left: 0;
+  border: 1px solid var(--c-ivory);
+  padding: var(--space-3) var(--space-5);
+}
+.is-quiz-done .quiz-done__aside { max-width: 34ch; }
+
+/* =================================================================
+   SCHERMATA DI CHIUSURA — COMPOSIZIONE
+   =================================================================
+   Il testo si spezzava in quattro righe corte perché il limite era 32
+   caratteri: su un messaggio centrato produceva una colonnina stretta.
+   Qui le misure si allargano, il testo si accorcia e l'equilibrio delle
+   righe lo decide il browser (text-wrap: balance), che su due o tre righe
+   le pareggia invece di lasciarne una monca.
+   ================================================================= */
+.is-quiz-done .gform_confirmation_wrapper {
+  gap: var(--space-3);
+  max-width: 40rem;
+}
+.is-quiz-done .quiz-done__eyebrow { font-size: 16px; letter-spacing: 0.16em; }
+.is-quiz-done .quiz-done__title {
+  font-size: clamp(32px, 6vw, 52px);
+  margin-top: calc(-1 * var(--space-1));
+}
+.is-quiz-done .gform_confirmation_message {
+  /* Niente tetto in caratteri su telefono: il pannello e. gia. stretto, e
+     limitarlo ancora produceva quattro righe da tre parole. */
+  max-width: none;
+  font-size: clamp(18px, 2.2vw, 22px);
+  line-height: 1.4;
+  text-wrap: balance;
+}
+@media (min-width: 640px) {
+  .is-quiz-done .gform_confirmation_message { max-width: 30ch; }
+}
+
+/* Il riepilogo diventa una riga-ricevuta: maiuscoletto spaziato, cornice
+   sottile, niente grassetto — deve leggersi come un timbro, non competere
+   col titolo. */
+.is-quiz-done .quiz-done__recap {
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border: 1px solid rgba(191, 187, 162, 0.5);
+  background: none;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.04em;
+  color: var(--c-ivory);
+}
+
+.is-quiz-done .quiz-done__aside {
+  max-width: none;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-dark-gray);
+}
+
+/* Due uscite affiancate: la principale piena, la secondaria contornata. */
+.quiz-done__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+.is-quiz-done .quiz-done__close { margin-top: 0; }
+.is-quiz-done .quiz-done__link {
+  --btn-ghost-fill: var(--c-ivory);
+  --btn-ghost-hover: var(--c-anthracite);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: var(--c-white);
+}
+.is-quiz-done .quiz-done__link:hover { border-color: var(--c-ivory); }
+.is-quiz-done .quiz-done__link:focus-visible { outline-color: var(--c-white); }
+
+/* Su telefono i due pulsanti vanno in colonna, principale sopra. */
+@media (max-width: 480px) {
+  .quiz-done__actions { flex-direction: column; align-self: stretch; }
+  .quiz-done__actions .btn { width: 100%; }
+}
+
+/* =================================================================
+   RECENSIONI: STESSO RESPIRO DELLE ALTRE SEZIONI
+   =================================================================
+   Qui dentro c'era il player video, e tutta una serie di regole legate
+   all'altezza del viewport comprimeva la sezione per farla stare in una
+   schermata: a 1265x860 il padding scendeva a 24px sopra e 12 sotto,
+   contro i 64/64 di "Un pacchetto completo", "Seguici sui social" e
+   "Contatti". Il video non c'è più — ci sono le recensioni Google, che
+   per natura sono più alte di una schermata — quindi quella compressione
+   ora produce solo una sezione schiacciata e senza stacco in fondo.
+
+   La sezione torna al ritmo delle altre, e smette di inseguire l'altezza
+   della finestra.
+   ================================================================= */
+.reviews-section { padding-block: var(--space-8); min-height: 0; }
+.reviews-section .section-head { margin-bottom: var(--space-4); }
+.reviews-section__top { padding-bottom: var(--space-6); }
+
+/* =================================================================
+   RESPIRO DENTRO LE CARD
+   =================================================================
+   Testo e spunta erano appoggiati ai bordi: 8px di margine interno su una
+   card alta 44, e la spunta senza alcuno stacco a destra. Si porta il
+   margine orizzontale a 16px — la stessa misura dei campi di testo — così
+   il contenuto della card respira come il resto del modulo.
+   La riga compatta dei locali resta stretta: lì le etichette sono di una
+   cifra e 16px per lato manderebbero a capo "5+".
+   ================================================================= */
+.gfield_radio--cards label { padding-inline: var(--space-4); }
+.gfield_radio--compact label { padding-inline: var(--space-2); }
+
+/* La spunta si stacca dal bordo: margin-left auto la spinge a destra, ma
+   senza un margine proprio finiva incollata alla cornice. */
+.gfield_radio--cards input:checked + label::after { margin-left: var(--space-3); }
+.gfield_radio--cards:not(.gfield_radio--compact) input:checked + label {
+  justify-content: space-between;
+  text-align: left;
+}
+
+/* =================================================================
+   LE DUE CTA DELLA CHIUSURA SI COMPORTANO COME TUTTE LE ALTRE
+   =================================================================
+   Nel resto del sito il passaggio del mouse fa scorrere un riempimento da
+   sinistra e INVERTE i colori. Qui il pulsante chiaro restava con lo stesso
+   testo prima e dopo, e il cambio avorio→bianco era quasi invisibile:
+   stessa meccanica solo sulla carta. Ora invertono davvero, adattati al
+   fondo scuro.
+   ================================================================= */
+.is-quiz-done .quiz-done__close {
+  background: var(--c-ivory);
+  border-color: var(--c-ivory);
+  color: var(--c-anthracite);
+}
+.is-quiz-done .quiz-done__close::before { background: var(--c-anthracite); }
+.is-quiz-done .quiz-done__close:hover,
+.is-quiz-done .quiz-done__close:focus-visible { color: var(--c-ivory); }
+
+.is-quiz-done .quiz-done__link {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--c-white);
+  --btn-ghost-fill: var(--c-ivory);
+  --btn-ghost-hover: var(--c-anthracite);
+}
+.is-quiz-done .quiz-done__link:hover,
+.is-quiz-done .quiz-done__link:focus-visible {
+  border-color: var(--c-ivory);
+  color: var(--c-anthracite);
+}
+
+/* =================================================================
+   CARD SELEZIONATE: PIU' RESPIRO AI LATI
+   =================================================================
+   16px per lato erano ancora stretti con la spunta in fondo: il testo
+   sembrava appoggiato alla cornice. Si sale a 20px e la spunta torna ad
+   essere spinta a destra dal solo margin-left:auto — il margine fisso che
+   aveva in piu' rubava larghezza all'etichetta e mandava a capo
+   "Da ristrutturare". Con questi numeri a 375px restano 131px di testo
+   contro i ~125 che serve: sta su una riga.
+   ================================================================= */
+.gfield_radio--cards:not(.gfield_radio--compact) label { padding-inline: 20px; }
+.gfield_radio--cards input:checked + label::after { margin-left: var(--space-2); }
+
+/* =================================================================
+   SCHERMATA DI CHIUSURA: STESSA COMPOSIZIONE SU TELEFONO
+   =================================================================
+   A schermo intero il pannello e' una griglia che allinea in alto: su
+   desktop il contenuto riempiva l'altezza e sembrava centrato, su telefono
+   lasciava mezza schermata vuota sotto i pulsanti. Qui il blocco si centra
+   davvero sull'asse verticale, a qualunque larghezza.
+   Inoltre "Gratuita e senza impegno" era grigio scuro su fondo antracite,
+   cioe' quasi illeggibile: passa al grigio chiaro, come le altre righe di
+   servizio su fondo scuro.
+   ================================================================= */
+.is-quiz-done .hero__panel--glass {
+  align-content: center;
+  justify-items: center;
+}
+.is-quiz-done .gform_confirmation_wrapper {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--space-3);
+}
+.is-quiz-done .quiz-done__aside { color: var(--c-light-gray); }
+
+/* Su telefono i due pulsanti restano a tutta larghezza ma non devono
+   diventare due barre sproporzionate rispetto al testo sopra. */
+@media (max-width: 480px) {
+  .quiz-done__actions { max-width: 20rem; width: 100%; }
+}
+/* Il wrapper ora riempie il pannello: a centrarlo deve essere lui, non la
+   griglia che lo contiene. */
+.is-quiz-done .gform_confirmation_wrapper {
+  justify-content: center;
+  align-content: center;
+}
+
+/* =================================================================
+   CARD TUTTE DELLA STESSA ALTEZZA
+   =================================================================
+   "Nuovo o ristrutturato" e' l'unica etichetta che va a capo: la sua riga
+   cresceva e il riquadro risultava piu' grande degli altri tre. Con righe
+   di griglia uniformi la piu' alta detta la misura per tutte, e le quattro
+   scelte tornano a pesare uguale — che e' il punto di una scelta multipla.
+   ================================================================= */
+.gfield_radio--cards { grid-auto-rows: 1fr; }
+
+/* =================================================================
+   CAMPI IN ERRORE: GLI INPUT RESTANO ALLINEATI IN ALTO
+   =================================================================
+   Il controllo veniva spinto in fondo al campo (margin-top: auto) per
+   tenere allineati Indirizzo e Civico quando una delle due etichette va a
+   capo. In stato di errore pero' l'altezza in piu' arriva dal messaggio,
+   che sotto "Civico" occupa due righe: lo spazio libero finiva SOPRA
+   l'input di Indirizzo, che scendeva di 24px rispetto al vicino.
+   Quando c'e' un messaggio di errore lo spazio libero va lasciato in fondo
+   al campo, non sopra il controllo.
+   ================================================================= */
+.gfield:has(.gfield_validation_message) .ginput_container { margin-top: 0; }
+/* Le righe sono gia' uguali, ma la <label> e' alta quanto il suo testo:
+   senza questo i riquadri restano disuguali dentro celle uguali. */
+.gfield_radio--cards .gchoice { display: flex; }
+.gfield_radio--cards label { flex: 1 1 auto; }
+
+/* =================================================================
+   TELEFONO: VIA LA LENTE DIETRO AL FORM
+   =================================================================
+   La cornice ingrandita e' un dettaglio pensato per lo schermo largo, dove
+   intorno al form resta spazio per vederla. Su telefono il form occupa
+   quasi tutta la larghezza, la lente si riduce a due fasce sopra e sotto e
+   aggiunge solo rumore: resta lo sfondo della hero, pulito.
+   ================================================================= */
+@media (max-width: 639px) {
+  .lens-layer { display: none; }
+}
+
+/* =================================================================
+   PRIMA DOMANDA: IL NUMERO STACCATO DAL BORDO
+   =================================================================
+   Il quadrato numerato aveva 8px a sinistra contro i 20 di destra: appena
+   si accendeva il bordo della selezione, il numero sembrava appoggiato
+   alla cornice. Stessa misura sui due lati, come nelle altre card.
+   ================================================================= */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label { padding-inline: 20px; }
+
+/* =================================================================
+   COMPATIBILITA' FRA BROWSER
+   =================================================================
+   La pagina usa poche cose recenti e tutte con una via d'uscita. Qui
+   stanno le reti di sicurezza che non si potevano scrivere accanto alla
+   regola originale.
+
+   1. :focus-visible non esiste prima di Safari 15.4 e Firefox 85. Senza
+      rete l'anello di focus sparirebbe del tutto, cioe' la pagina
+      diventerebbe inusabile da tastiera. Dentro @supports la regola
+      vive SOLO dove :focus-visible manca, quindi sui browser moderni non
+      aggiunge nulla e non raddoppia l'anello.
+   2. :has() (allineamento dei campi in errore) manca prima di Safari 15.4
+      e Firefox 121: dove manca, la regola viene semplicemente ignorata e
+      i campi affiancati tornano al comportamento precedente. Nessuna
+      rottura, solo 24px di disallineamento quando entrambi sono in errore.
+   3. 100dvh, overflow:clip e text-wrap hanno gia' il loro fallback
+      scritto come dichiarazione precedente, dove il browser vecchio
+      tiene la versione che capisce.
+   ================================================================= */
+@supports not selector(:focus-visible) {
+  a:focus,
+  button:focus,
+  input:focus,
+  select:focus,
+  textarea:focus,
+  [tabindex]:focus {
+    outline: 3px solid var(--c-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+/* =================================================================
+   SCHERMI ZOOMATI
+   =================================================================
+   Con lo zoom del browser il viewport in px CSS si accorcia: un 1366x768
+   al 150% diventa 911x512. Le regole legate a max-height scattavano tutte
+   insieme e comprimevano hero, "Perche' scegliere Effegi" e "Come
+   funziona" fino a renderle visibilmente piu' strette delle altre
+   sezioni, che invece non erano gate-ate sull'altezza. Il risultato era
+   una pagina con due respiri diversi a seconda della sezione.
+
+   La scelta ora e' esplicita: una sezione puo' essere piu' alta del
+   viewport e si scorre — e' il comportamento normale di una pagina. Le
+   compattazioni sono state rimosse dove stavano (righe segnate sopra).
+   L'unica cosa che DEVE stare nel viewport e' il form, e ci sta per
+   conto suo: lo prova la misura, non la compressione delle sezioni.
+
+   Qui si ripristina il respiro della hero sui viewport bassi: restano le
+   sole correzioni che servono alla lente, che e' un elemento geometrico e
+   non un margine tipografico.
+   ================================================================= */
+@media (min-width: 640px) and (max-height: 820px) {
+  /* Il pannello respira un po. di piu. di prima (24/32 invece di 24/32
+     stretti), ma non quanto una sezione qualsiasi: deve contenere il form
+     senza scorrimento interno, ed e. questo il vincolo che comanda. */
+  .hero__panel--glass { padding: var(--space-5) var(--space-6); }
+}
+
+/* =================================================================
+   NIENTE SCORRIMENTO DENTRO IL FORM
+   =================================================================
+   Le schede del quiz avevano overflow-y: auto come rete di sicurezza.
+   Misurato su tutta la matrice (dal 400x250 al 1920x1080) ogni scheda sta
+   nel pannello con margine: la rete non serviva e, quando scattava,
+   produceva una barra di scorrimento dentro il form — esattamente la cosa
+   che il percorso a step deve evitare, perche' nasconde il pulsante.
+   ================================================================= */
+.gform_page_fields,
+.is-quiz-fullscreen .gform_page_fields { overflow-y: visible; }
+
+/* =================================================================
+   VIEWPORT BASSO E LARGO (zoom del browser su desktop)
+   =================================================================
+   Tolta la barra di scorrimento interna, lo step 2 — il piu' lungo, otto
+   campi — deve rientrare da solo. A 911x512 (1366x768 al 150%) ne chiedeva
+   75 in piu'. Si recuperano comprimendo IL FORM, non le sezioni: campi
+   piu' bassi, interlinea fra i campi ridotta, etichette piu' vicine ai
+   controlli. Le sezioni della pagina restano con il loro respiro pieno:
+   e' la distinzione chiesta esplicitamente — la pagina scorre, il form no.
+   ================================================================= */
+@media (max-height: 620px) {
+  .gform_fields { gap: var(--space-2) var(--space-3); }
+  .gfield_label { margin-bottom: var(--space-1); font-size: 16px; }
+  .ginput_container input[type="text"],
+  .ginput_container input[type="email"],
+  .ginput_container input[type="tel"],
+  .ginput_container input[type="number"],
+  .ginput_container select { min-height: 42px; padding-block: var(--space-2); }
+  .gfield_radio--cards label { min-height: 42px; }
+  .gfield_radio--cards { gap: var(--space-2); }
+  .gform_page_footer { margin-top: var(--space-3); }
+  .quiz-recap { padding: var(--space-2) var(--space-3); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-3); }
+}
+
+/* Righe ad altezza naturale. Con minmax(0,1fr) la riga dei campi veniva
+   schiacciata a quello che restava e il contenuto, non potendo scorrere,
+   finiva SOPRA i pulsanti: sovrapposizione misurata di 161px a 911x512.
+   Con righe "auto" i campi occupano quello che chiedono, lo spazio che
+   avanza va fra campi e pulsanti (space-between tiene i pulsanti in
+   fondo), e il compito di farli stare nel viewport torna dove deve
+   stare: alla compattazione del form, non al layout. */
+.gform_page:not([style*="display: none"]),
+.is-quiz-fullscreen .gform_page:not([style*="display: none"]) {
+  grid-template-rows: auto auto;
+  align-content: space-between;
+}
+
+/* Zoom spinto (200% e oltre su un portatile): 683x384 e sotto. Si stringe
+   ancora il form, e lo step 2 — otto campi — passa a due colonne piene:
+   su un viewport basso e largo l'altezza e' la risorsa scarsa e la
+   larghezza avanza, quindi si paga in larghezza. */
+@media (max-height: 470px) {
+  .gform_fields { gap: 6px var(--space-3); }
+  .gfield_label { margin-bottom: 2px; }
+  .ginput_container input[type="text"],
+  .ginput_container input[type="email"],
+  .ginput_container input[type="tel"],
+  .ginput_container input[type="number"],
+  .ginput_container select { min-height: 38px; padding-block: 4px; }
+  .gfield_radio--cards label { min-height: 38px; }
+  .gfield_radio--cards { gap: 6px; }
+  .gform_page_footer { margin-top: var(--space-2); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-2); }
+  .quiz-recap { padding: var(--space-2); }
+  /* Due colonne: i campi larghi si dimezzano. */
+  .quiz-question--sub { margin-block: 2px 0; }
+}
+
+/* Le disposizioni su piu. colonne hanno senso solo se la larghezza c.e.:
+   sotto i 480px i campi affiancati diventano illeggibili. */
+@media (min-width: 480px) and (max-height: 620px) {
+  /* Comune, Indirizzo e Civico su una riga sola: un campo in meno in
+     verticale vale piu. di qualche carattere di larghezza. */
+  #field_1_2 { grid-column: span 4; }
+  #field_1_3 { grid-column: span 5; }
+  #field_1_4 { grid-column: span 3; }
+  #field_1_8, #field_1_9 { grid-column: span 6; }
+  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gform_page[data-quiz-page="1"] .gfield_radio--cards label { min-height: 44px; }
+}
+
+/* Ultimo giro di vite per i viewport bassi e stretti (546x307: mancavano
+   19px sullo step 2 e 29 sul 3). Non si tocca il corpo del testo, che
+   resta a 16px: si lavora solo su altezze dei controlli e distanze. */
+@media (max-height: 470px) {
+  .gform_fields { gap: 4px var(--space-3); }
+  .ginput_container input[type="text"],
+  .ginput_container input[type="email"],
+  .ginput_container input[type="tel"],
+  .ginput_container input[type="number"],
+  .ginput_container select { min-height: 36px; }
+  .gfield_radio--cards label { min-height: 36px; }
+  .ginput_container_consent { gap: var(--space-2); }
+  .form-card__legal { margin-top: var(--space-1); }
+}
+
+/* =================================================================
+   IL LIMITE DICHIARATO
+   =================================================================
+   Sotto i 470px di altezza di viewport — in pratica dal 200% di zoom in
+   su su un portatile — otto campi con testo a 16px non entrano: e.
+   aritmetica, non layout. Misurato dopo tutta la compattazione possibile:
+   a 683x384 mancano 8px, a 546x307 ne mancano 47. L.alternativa allo
+   scorrimento interno sarebbe tagliare i campi o scendere sotto i 16px,
+   e sono entrambe peggio. Quindi la promessa "niente scroll dentro il
+   form" vale fino a 470px di altezza compresi i 512 del 150% di zoom;
+   sotto, torna la barra interna come rete di sicurezza.
+   ================================================================= */
+@media (max-height: 470px) {
+  .gform_page_fields,
+  .is-quiz-fullscreen .gform_page_fields { overflow-y: auto; }
+}
+
+/* Le regole del quiz a tutto schermo sono scritte con .is-quiz-fullscreen
+   davanti e vincono per specificita' su quelle qui sopra: vanno ripetute
+   nello stesso scope, altrimenti la compattazione non arriva mai dove
+   serve davvero, cioe' proprio dentro il percorso. */
+@media (max-height: 470px) {
+  .is-quiz-fullscreen .gform_fields { gap: 4px var(--space-3); }
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 36px; padding-block: 4px; }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 36px; }
+  .is-quiz-fullscreen .gfield_label { margin-bottom: 2px; }
+  .is-quiz-fullscreen .gform_page_footer { margin-top: var(--space-2); }
+  .is-quiz-fullscreen .gf_progressbar_wrapper { margin-bottom: var(--space-2); }
+}
+
+/* =================================================================
+   "PERCHE' SCEGLIERE EFFEGI" E "COME FUNZIONA": STESSO RESPIRO
+   =================================================================
+   Il blocco max-width:959px comprimeva queste due sezioni a 12px di
+   padding verticale contro i 64 di "Un pacchetto completo", "Seguici sui
+   social", le recensioni e i contatti. Era nato per i tablet, dove si
+   voleva far stare immagine + elenco in una schermata; ma con lo zoom del
+   browser ci finisce dentro anche un desktop a 150%, e la pagina mostrava
+   due respiri diversi a seconda della sezione — il difetto segnalato.
+   Da 640px in su le due sezioni adottano la stessa misura delle altre e,
+   se non stanno in una schermata, si scorre.
+   ================================================================= */
+@media (min-width: 640px) {
+  .manifesto__content,
+  .process-section__content { padding-block: var(--space-8); }
+  .manifesto .section-head,
+  .process-section .section-head { margin-bottom: var(--space-5); }
+  .manifesto__lead { margin-bottom: var(--space-4); padding-bottom: var(--space-4); }
+  .manifesto-item__trigger { padding-block: var(--space-3); }
+  .process-step { padding-block: var(--space-3); }
+}
+
+/* =================================================================
+   LA HERO A RIPOSO NON COMPRIME IL FORM
+   =================================================================
+   Il pannello della hero aveva un tetto d'altezza e una riga
+   minmax(0,1fr) per il form: su un viewport basso quella riga si
+   stringeva a meno di quanto il form chiede e il contenuto usciva dal
+   pannello (misurato: riga da 92px per un form da 294). Finche' c'era
+   overflow-y:auto il difetto si vedeva come barra interna; tolta quella,
+   si vedeva come testo sovrapposto.
+   La regola e' semplice e dichiarata: finche' il quiz non e' iniziato il
+   pannello e' alto quanto il suo contenuto e, se non ci sta, scorre la
+   PAGINA. Appena il quiz parte passa a schermo intero, dove e' il form a
+   stringersi (vedi i blocchi max-height qui sopra) e non scorre niente.
+   ================================================================= */
+body:not(.is-quiz-fullscreen) .hero__panel--glass {
+  max-height: none;
+  display: block;
+}
+body:not(.is-quiz-fullscreen) .hero__panel-content { display: block; }
+body:not(.is-quiz-fullscreen) .gform_wrapper,
+body:not(.is-quiz-fullscreen) .gform-body,
+body:not(.is-quiz-fullscreen) .gform_page:not([style*="display: none"]) { display: block; }
+body:not(.is-quiz-fullscreen) .gform_page_fields { min-height: auto; }
+
+/* La compattazione a 620px di altezza va ripetuta nello scope
+   .is-quiz-fullscreen, che ha specificita' maggiore (stesso motivo
+   spiegato piu' sopra per il gradino a 470). */
+@media (max-height: 620px) {
+  .is-quiz-fullscreen .gform_fields { gap: var(--space-2) var(--space-3); }
+  .is-quiz-fullscreen .gfield_label { margin-bottom: var(--space-1); }
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 42px; padding-block: var(--space-2); }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 42px; }
+  .is-quiz-fullscreen .gform_page_footer { margin-top: var(--space-3); }
+  .is-quiz-fullscreen .gf_progressbar_wrapper { margin-bottom: var(--space-3); }
+}
+/* A 911x512 (1366x768 al 150%) lo step 2 sforava ancora di 25px e il 3
+   arrivava raso: questi sono i 40 che servono per avere margine. */
+@media (max-height: 620px) {
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 40px; }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 40px; }
+  .is-quiz-fullscreen .gform_fields { gap: 6px var(--space-3); }
+  .is-quiz-fullscreen .quiz-question--sub { margin-block: var(--space-1) 0; }
+  .is-quiz-fullscreen .quiz-recap { padding: var(--space-2) var(--space-3); }
+}
+/* Gli ultimi 20px li da. il pannello stesso: a schermo intero il margine
+   verticale non deve essere generoso quanto quello di un riquadro
+   appoggiato su una fotografia. */
+@media (max-height: 620px) {
+  .is-quiz-fullscreen .hero__panel--glass { padding-block: var(--space-3); }
+}
+
+/* A 683x384 (1366x768 al 200%) lo step 2 sforava di 86px. Si recuperano
+   senza togliere niente: Superficie, Anno e Locali stanno su una riga
+   sola invece di due, e "In che stato" riprende tutta la larghezza con le
+   quattro scelte affiancate. Serve larghezza, quindi da 600px in su. */
+@media (min-width: 600px) and (max-height: 470px) {
+  #field_1_6 { grid-column: span 3; }
+  #field_1_7 { grid-column: span 3; }
+  #field_1_8 { grid-column: span 6; }
+  #field_1_9 { grid-column: 1 / -1; }
+  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-height: 470px) {
+  .is-quiz-fullscreen .hero__panel--glass { padding-block: var(--space-2); }
+  .is-quiz-fullscreen .gf_progressbar_wrapper { margin-bottom: var(--space-1); }
+  .is-quiz-fullscreen .quiz-question--sub { margin-block: 0; }
+}
+/* Gli ultimi 8px dello step 2 a 683x384. */
+@media (max-height: 470px) {
+  .is-quiz-fullscreen .gform_page_footer { margin-top: var(--space-1); }
+  .is-quiz-fullscreen .ginput_container_consent { gap: var(--space-2); }
+}
+/* Gli 8px che restavano a 683x384: con overflow-y:auto la barra compare
+   solo se serve davvero, quindi vale la pena recuperarli. */
+@media (max-height: 470px) {
+  .is-quiz-fullscreen .gfield_label { margin-bottom: 0; }
+}
+/* A 911x512 lo step 2 restava lungo di un pelo: 2px per etichetta su
+   cinque etichette bastano a chiudere il conto. */
+@media (max-height: 620px) {
+  .is-quiz-fullscreen .gfield_label { margin-bottom: 2px; }
+}
+/* Mancavano ancora 27px allo step 2 a 911x512: ultimo giro, tutto su
+   altezze e distanze, il testo resta a 16px. */
+@media (max-height: 620px) {
+  .is-quiz-fullscreen .ginput_container input[type="text"],
+  .is-quiz-fullscreen .ginput_container input[type="email"],
+  .is-quiz-fullscreen .ginput_container input[type="tel"],
+  .is-quiz-fullscreen .ginput_container input[type="number"],
+  .is-quiz-fullscreen .ginput_container select { min-height: 38px; }
+  .is-quiz-fullscreen .gfield_radio--cards label { min-height: 38px; }
+  .is-quiz-fullscreen .gform_fields { gap: 4px var(--space-3); }
+  .is-quiz-fullscreen .gf_progressbar_wrapper { margin-bottom: var(--space-2); }
+  .is-quiz-fullscreen .hero__panel--glass { padding-block: var(--space-2); }
+}
+/* Gli ultimi 7px. */
+@media (max-height: 620px) {
+  .is-quiz-fullscreen .quiz-question--sub { margin-block: 0; }
+}
+
+/* =================================================================
+   PRIMA DOMANDA: LA FRECCIA DISEGNATA, NON RITAGLIATA
+   =================================================================
+   La freccia era il carattere "→", che una regola successiva riduceva a
+   un rettangolo di 2x8px con i bordi: il risultato al passaggio del mouse
+   era un segno mozzo schiacciato contro la cornice, visibile soprattutto
+   sulle card strette degli schermi zoomati. Ora e' un chevron disegnato
+   con i bordi — la stessa mano dei chevron dei pulsanti — con una misura
+   sua e lo spazio per stare dentro.
+   ================================================================= */
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label { overflow: visible; }
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label::after,
+.gform_page[data-quiz-page="1"] .gfield_radio--cards input:checked + label::after {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border: solid currentColor;
+  border-width: 2px 2px 0 0;
+  margin-left: auto;
+  margin-right: 4px;
+  transform: rotate(45deg) translate(-3px, 3px);
+  opacity: 0;
+}
+.gform_page[data-quiz-page="1"] .gfield_radio--cards label:hover::after,
+.gform_page[data-quiz-page="1"] .gfield_radio--cards input:checked + label::after {
+  opacity: 1;
+  transform: rotate(45deg) translate(0, 0);
+}
+
+/* =================================================================
+   SCHERMI ZOOMATI: "IN CHE STATO" SOTTO "QUANTI LOCALI"
+   =================================================================
+   Affiancarli faceva stare tutto in una riga, ma schiacciava due domande
+   diverse sulla stessa linea e accorciava le etichette. Tornano
+   incolonnate, una domanda per riga, e l'altezza che servirebbe in piu'
+   la restituiscono le chip: piu' basse, non piu' strette di testo. Niente
+   e' cambiato su margini, gap, padding o corpo del testo.
+   ================================================================= */
+@media (min-width: 480px) and (max-height: 620px) {
+  #field_1_8,
+  #field_1_9 { grid-column: 1 / -1; }
+  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .is-quiz-fullscreen #field_1_8 .gfield_radio--cards label,
+  .is-quiz-fullscreen #field_1_9 .gfield_radio--cards label { min-height: 34px; }
+}
+/* Restavano 3px: li danno le chip, che a questa altezza non hanno bisogno
+   di 34px. Il testo resta a 16px. */
+@media (min-width: 480px) and (max-height: 620px) {
+  .is-quiz-fullscreen #field_1_8 .gfield_radio--cards label,
+  .is-quiz-fullscreen #field_1_9 .gfield_radio--cards label { min-height: 32px; }
+}
+/* Le chip dello stato sono larghe 184px: con 20px di margine interno per
+   lato "Nuovo o ristrutturato" va a capo e, essendo le righe uniformi,
+   alza tutte e quattro da 50 a 74px. Stringendo il margine interno a 12px
+   l'etichetta sta su una riga e la fila torna bassa — e' il
+   "ridimensionamento" delle chip, non una rinuncia sugli spazi del form. */
+@media (min-width: 480px) and (max-height: 620px) {
+  #field_1_9 .gfield_radio--cards label { padding-inline: 12px; }
+}
+
+/* Il blocco qui sopra (<=620px) riscrive anche il caso <=470, che e'
+   definito prima nel foglio: va ridichiarato dopo, altrimenti a 683x384
+   si perde la riga unica Superficie/Anno/Locali e lo step 2 torna a
+   sforare di 132px. "In che stato" resta comunque sotto "Quanti locali",
+   come chiesto. */
+@media (min-width: 600px) and (max-height: 470px) {
+  #field_1_6 { grid-column: span 3; }
+  #field_1_7 { grid-column: span 3; }
+  #field_1_8 { grid-column: span 6; }
+  #field_1_9 { grid-column: 1 / -1; }
+  .is-quiz-fullscreen #field_1_8 .gfield_radio--cards label,
+  .is-quiz-fullscreen #field_1_9 .gfield_radio--cards label { min-height: 30px; }
 }

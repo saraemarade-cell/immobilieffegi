@@ -12,11 +12,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Scopri il valore del tuo immobile | Effegi Gruppo Immobiliare">
 <meta property="og:description" content="Richiedi la valutazione gratuita del tuo immobile a Cernusco sul Naviglio, Melzo e Vignate.">
-<meta property="og:image" content="assets/img/foto/hero-soggiorno-vista.webp">
+<meta property="og:image" content="assets/imgdev/Foto1Hero.webp">
 <meta property="og:locale" content="it_IT">
 <meta property="og:url" content="https://immobilieffegi.it/valuta-il-tuo-immobile/">
 
-<link rel="icon" type="image/webp" href="assets/img/effegi-logo.webp">
+<link rel="icon" type="image/webp" href="logoeffigi.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;0,900;1,400&display=swap">
@@ -91,7 +91,7 @@
 <header class="site-header" data-reveal="fade">
   <div class="container site-header__inner">
     <a href="#hero" class="site-header__logo" aria-label="Effegi Gruppo Immobiliare — torna in cima">
-      <img src="assets/img/effegi-logo.webp" alt="Effegi Gruppo Immobiliare" width="88" height="88">
+      <img src="logoeffigi.webp" alt="Effegi Gruppo Immobiliare" width="88" height="88">
       <span class="site-header__wordmark">EFFEGI<small>Gruppo Immobiliare</small></span>
     </a>
     <a href="#hero" class="btn btn--accent btn--sm site-header__cta" data-track="header_cta_click">
@@ -110,7 +110,7 @@
        ============================================================ -->
   <section class="hero" id="hero">
     <div class="hero__bg" aria-hidden="true">
-      <img src="assets/img/foto/hero-soggiorno-vista.webp" alt="" width="1536" height="1024" fetchpriority="high">
+      <img src="assets/imgdev/Foto1Hero.webp" alt="" width="1536" height="1024" fetchpriority="high">
       <span class="hero__bg-scrim"></span>
     </div>
 
@@ -138,69 +138,335 @@
           </p>
 
           <div class="form-card">
-          <div class="form-card__body" id="current-effegi-form" data-component="CurrentEffegiForm">
+          <div class="form-card__body" id="valuation-quiz" data-component="InteractiveValuationQuiz">
 
-            <!-- Form standard di raccolta lead — non un wizard. I campi
-                 (Comune, Indirizzo, Civico) sono quelli reali del form
-                 esistente su immobilieffegi.it/valuta-il-tuo-immobile/.
-                 Dopo l'invio la richiesta prosegue sul modulo ufficiale
-                 Effegi (vedi nota estesa in assets/js/main.js): nessun
-                 campo successivo è stato inventato. -->
-            <form class="valuation-step" data-step-panel="1" novalidate>
-              <h2 class="form-card__title">Richiedi la tua valutazione</h2>
+            <!-- ============================================================
+                 QUIZ DI VALUTAZIONE — struttura Gravity Forms
+                 ============================================================
+                 Il markup qui sotto riproduce fedelmente quello che Gravity
+                 Forms genera per un form multi-pagina con tema Orbital
+                 (GF 2.9): gform_wrapper + gform-theme--framework, gform_page,
+                 gform_fields/gfield, ginput_container, gchoice,
+                 gform_page_footer, gf_progressbar. Le classi NON sono
+                 decorative: sono quelle su cui poggia il CSS, così il foglio
+                 di stile scritto qui funziona senza riscritture quando il
+                 form verrà creato davvero in Gravity Forms.
 
-              <div class="field">
-                <label for="v-comune">Comune</label>
-                <input type="text" id="v-comune" name="comune" placeholder="Comune del tuo immobile…" autocomplete="address-level2" required>
-                <span class="field__error" role="alert"></span>
-              </div>
+                 PROVENIENZA DEI CAMPI (nessuno inventato a caso):
+                 · Comune / Indirizzo / Civico → campi reali dello step 1 del
+                   form attualmente online su immobilieffegi.it
+                 · Nome / Cognome / Email / Telefono / consenso privacy →
+                   campi reali del modulo contatti Effegi sulla stessa pagina
+                 · Tipologia, superficie, locali, anno, stato → derivati dai
+                   "6 principali criteri per la valutazione di un immobile"
+                   dichiarati dalla reference Engel & Völkers (ubicazione,
+                   anno di costruzione, condizioni, tipo di proprietà,
+                   caratteristiche, domanda e offerta).
+                 Da confermare con il cliente prima della messa in opera.
 
-              <div class="field-row">
-                <div class="field field--grow">
-                  <label for="v-indirizzo">Indirizzo</label>
-                  <input type="text" id="v-indirizzo" name="indirizzo" placeholder="Indirizzo immobile…" autocomplete="address-line1" required>
-                  <span class="field__error" role="alert"></span>
-                </div>
-                <div class="field field--narrow">
-                  <label for="v-civico">Civico</label>
-                  <input type="text" id="v-civico" name="civico" placeholder="Civico" inputmode="numeric" autocomplete="off" required>
-                  <span class="field__error" role="alert"></span>
-                </div>
-              </div>
+                 LIMITE DICHIARATO: qui non gira WordPress, quindi questa è la
+                 resa statica del form. La raccolta progressiva reale a ogni
+                 step è responsabilità di Gravity Forms + Partial Entries
+                 Add-On (licenza Elite): vedi GRAVITY-FORMS.md.
+                 ============================================================ -->
+            <div class="gform_wrapper gform-theme gform-theme--foundation gform-theme--framework gform-theme--orbital"
+                 id="gform_wrapper_1" data-form-theme="orbital" data-form-index="0">
 
-              <button type="submit" class="btn btn--accent btn--block" data-track="valuation_step_1_submit">
-                <span>Richiedi la valutazione</span>
-              </button>
-
-              <p class="form-card__legal">Gratuita, senza impegno.</p>
-            </form>
-
-            <div class="valuation-step valuation-step--handoff" data-step-panel="2-3" hidden>
-              <h2 class="form-card__title">Completa la richiesta</h2>
-
-              <dl class="valuation-recap" aria-label="Dati già inseriti">
-                <div><dt>Comune</dt><dd data-recap="comune"></dd></div>
-                <div><dt>Indirizzo</dt><dd data-recap="indirizzo"></dd></div>
-                <div><dt>Civico</dt><dd data-recap="civico"></dd></div>
-              </dl>
-
-              <p class="form-card__note">
-                I dati inseriti sono confermati qui sopra. Completa la richiesta sul modulo
-                ufficiale Effegi qui sotto per essere ricontattato.
-              </p>
-
-              <div class="live-form-mount" data-live-form-mount>
-                <div class="live-form-mount__skeleton" data-live-form-skeleton>
-                  <span class="skeleton-line" style="width:40%"></span>
-                  <span class="skeleton-line" style="width:100%"></span>
-                  <span class="skeleton-line" style="width:70%"></span>
-                  <span class="skeleton-line" style="width:100%"></span>
+              <!-- Barra di avanzamento: in Gravity Forms si attiva dalle
+                   impostazioni del form (Progress Indicator = Progress Bar) e
+                   genera esattamente queste classi. -->
+              <div id="gf_progressbar_wrapper_1" class="gf_progressbar_wrapper">
+                <p class="gf_progressbar_title">
+                  <span class="gf_progressbar_step_label" data-step-label>Il tuo immobile</span>
+                  <span class="gf_progressbar_count">
+                    <span class="gf_step_current_page">1</span><span class="gf_progressbar_sep">/</span><span class="gf_step_page_count">3</span>
+                  </span>
+                </p>
+                <!-- Avanzamento a segmenti invece che a barra continua: si
+                     conta a colpo d'occhio quanto manca, ed è coerente col
+                     linguaggio a blocchi del resto della pagina. In Gravity
+                     Forms resta un Progress Bar: cambia solo la veste. -->
+                <div class="gf_progressbar" data-progress-segments>
+                  <span class="gf_progressbar_seg is-done"></span>
+                  <span class="gf_progressbar_seg"></span>
+                  <span class="gf_progressbar_seg"></span>
+                  <span class="gf_progressbar_percentage screen-reader-text" data-progress-bar>33% completato</span>
                 </div>
               </div>
 
-              <button type="button" class="btn btn--ghost btn--sm valuation-step__back" data-step-back>
-                <span>← Torna indietro</span>
-              </button>
+              <form method="post" id="gform_1" class="quiz-form" novalidate>
+                <div class="gform-body gform_body">
+
+                  <!-- ========== STEP 1 — LA DOMANDA ========== -->
+                  <div id="gform_page_1_1" class="gform_page" data-quiz-page="1">
+                    <div class="gform_page_fields">
+                      <div id="gform_fields_1" class="gform_fields top_label">
+
+                        <div id="field_1_1" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" id="field_1_1_label">
+                            Che tipo di immobile vuoi valutare?
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_radio">
+                            <div class="gfield_radio gfield_radio--cards" id="input_1_1" role="radiogroup" aria-labelledby="field_1_1_label" data-autoadvance>
+                              <div class="gchoice gchoice_1_1_0">
+                                <input class="gfield-choice-input" name="input_1" type="radio" value="Appartamento" id="choice_1_1_0" required>
+                                <label for="choice_1_1_0" class="gform-field-label gform-field-label--type-inline">Appartamento</label>
+                              </div>
+                              <div class="gchoice gchoice_1_1_1">
+                                <input class="gfield-choice-input" name="input_1" type="radio" value="Casa indipendente" id="choice_1_1_1">
+                                <label for="choice_1_1_1" class="gform-field-label gform-field-label--type-inline">Casa indipendente</label>
+                              </div>
+                              <div class="gchoice gchoice_1_1_2">
+                                <input class="gfield-choice-input" name="input_1" type="radio" value="Villa o villetta a schiera" id="choice_1_1_2">
+                                <label for="choice_1_1_2" class="gform-field-label gform-field-label--type-inline">Villa o villetta a schiera</label>
+                              </div>
+                              <div class="gchoice gchoice_1_1_3">
+                                <input class="gfield-choice-input" name="input_1" type="radio" value="Altro" id="choice_1_1_3">
+                                <label for="choice_1_1_3" class="gform-field-label gform-field-label--type-inline">Altro</label>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div class="gform_page_footer top_label">
+                      <p class="form-card__legal form-card__legal--left">Gratuita, confidenziale e senza impegno.</p>
+                    </div>
+                  </div>
+
+                  <!-- ========== STEP 2 — IL TUO IMMOBILE ========== -->
+                  <div id="gform_page_1_2" class="gform_page" data-quiz-page="2" style="display:none">
+                    <div class="gform_page_fields">
+                      <div class="gform_fields top_label">
+
+                        <div class="gfield gfield--type-html gfield--width-full">
+                          <p class="quiz-question">Dove si trova?</p>
+                        </div>
+
+                        <div id="field_1_2" class="gfield gfield--type-text gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_2">
+                            Comune
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_text">
+                            <input name="input_2" id="input_1_2" type="text" class="large"
+                                   placeholder="Comune del tuo immobile…" autocomplete="address-level2" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_3" class="gfield gfield--type-text gfield--width-two-thirds gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_3">
+                            Indirizzo
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_text">
+                            <input name="input_3" id="input_1_3" type="text" class="large"
+                                   placeholder="Indirizzo immobile…" autocomplete="address-line1" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_4" class="gfield gfield--type-text gfield--width-one-third gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_4">
+                            Civico
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_text">
+                            <input name="input_4" id="input_1_4" type="text" class="large"
+                                   placeholder="Civico" inputmode="numeric" autocomplete="off" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+                        <div class="gfield gfield--type-html gfield--width-full">
+                          <p class="quiz-question quiz-question--sub">Com&rsquo;&egrave; fatto?</p>
+                        </div>
+
+                        <div id="field_1_6" class="gfield gfield--type-number gfield--width-half gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_6">
+                            Superficie
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_number">
+                            <input name="input_6" id="input_1_6" type="number" min="15" max="2000" step="1"
+                                   class="large" placeholder="mq" inputmode="numeric" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_7" class="gfield gfield--type-select gfield--width-half gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_7">
+                            Anno di costruzione
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_select">
+                            <select name="input_7" id="input_1_7" class="large gfield_select" required>
+                              <option value="">Seleziona…</option>
+                              <option value="Prima del 1950">Prima del 1950</option>
+                              <option value="1950-1979">1950 – 1979</option>
+                              <option value="1980-1999">1980 – 1999</option>
+                              <option value="2000-2010">2000 – 2010</option>
+                              <option value="Dopo il 2010">Dopo il 2010</option>
+                              <option value="Non lo so">Non lo so</option>
+                            </select>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_8" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" id="field_1_8_label">
+                            Quanti locali?
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_radio">
+                            <div class="gfield_radio gfield_radio--cards gfield_radio--compact" id="input_1_8" role="radiogroup" aria-labelledby="field_1_8_label">
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="1" id="choice_1_8_0" required><label for="choice_1_8_0" class="gform-field-label gform-field-label--type-inline">1</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="2" id="choice_1_8_1"><label for="choice_1_8_1" class="gform-field-label gform-field-label--type-inline">2</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="3" id="choice_1_8_2"><label for="choice_1_8_2" class="gform-field-label gform-field-label--type-inline">3</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="4" id="choice_1_8_3"><label for="choice_1_8_3" class="gform-field-label gform-field-label--type-inline">4</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="5 o più" id="choice_1_8_4"><label for="choice_1_8_4" class="gform-field-label gform-field-label--type-inline">5+</label></div>
+                            </div>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_9" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" id="field_1_9_label">
+                            In che stato si trova?
+                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_radio">
+                            <div class="gfield_radio gfield_radio--cards" id="input_1_9" role="radiogroup" aria-labelledby="field_1_9_label" data-autoadvance>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Da ristrutturare" id="choice_1_9_0" required><label for="choice_1_9_0" class="gform-field-label gform-field-label--type-inline">Da ristrutturare</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Buono stato" id="choice_1_9_1"><label for="choice_1_9_1" class="gform-field-label gform-field-label--type-inline">Buono stato</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Ottimo stato" id="choice_1_9_2"><label for="choice_1_9_2" class="gform-field-label gform-field-label--type-inline">Ottimo stato</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Nuovo o ristrutturato" id="choice_1_9_3"><label for="choice_1_9_3" class="gform-field-label gform-field-label--type-inline">Nuovo o ristrutturato</label></div>
+                            </div>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div class="gform_page_footer top_label">
+                      <button type="button" id="gform_previous_button_1_5" class="gform_previous_button gform-theme-button gform-theme-button--secondary btn btn--ghost btn--sm" data-quiz-prev>
+                        <span>Indietro</span>
+                      </button>
+                      <button type="button" id="gform_next_button_1_5" class="gform_next_button gform-theme-button btn btn--accent"
+                              data-quiz-next data-track="valuation_step_1_submit">
+                        <span>Continua</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- ========== STEP 3 — I TUOI DATI ========== -->
+                  <div id="gform_page_1_3" class="gform_page" data-quiz-page="3" style="display:none">
+                    <div class="gform_page_fields">
+                      <div class="gform_fields top_label">
+
+                        <div class="gfield gfield--type-html gfield--width-full">
+                          <p class="quiz-recap" data-quiz-recap aria-live="polite"></p>
+                        </div>
+
+                        <div id="field_1_11" class="gfield gfield--type-text gfield--width-half gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_11">Nome<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
+                          <div class="ginput_container ginput_container_text">
+                            <input name="input_11" id="input_1_11" type="text" class="large" placeholder="Nome" autocomplete="given-name" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_12" class="gfield gfield--type-text gfield--width-half gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_12">Cognome<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
+                          <div class="ginput_container ginput_container_text">
+                            <input name="input_12" id="input_1_12" type="text" class="large" placeholder="Cognome" autocomplete="family-name" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_13" class="gfield gfield--type-email gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_13">Email<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
+                          <div class="ginput_container ginput_container_email">
+                            <input name="input_13" id="input_1_13" type="email" class="large" placeholder="Email" autocomplete="email" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_14" class="gfield gfield--type-phone gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_14">Telefono<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
+                          <div class="ginput_container ginput_container_phone">
+                            <input name="input_14" id="input_1_14" type="tel" class="large" placeholder="Telefono" autocomplete="tel" inputmode="tel" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_15" class="gfield gfield--type-consent gfield--width-full gfield_contains_required">
+                          <div class="ginput_container ginput_container_consent">
+                            <input name="input_15.1" id="input_1_15_1" type="checkbox" value="1" class="gfield-choice-input" required>
+                            <label class="gform-field-label gform-field-label--type-inline gfield_consent_label" for="input_1_15_1">
+                              Dichiaro di aver letto l&rsquo;<a href="https://immobilieffegi.it/privacy-policy/" target="_blank" rel="noopener">informativa privacy</a>
+                              e acconsento al trattamento dei miei dati.<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                            </label>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div class="gform_page_footer top_label">
+                      <button type="button" id="gform_previous_button_1_16" class="gform_previous_button gform-theme-button gform-theme-button--secondary btn btn--ghost btn--sm" data-quiz-prev>
+                        <span>Indietro</span>
+                      </button>
+                      <button type="submit" id="gform_submit_button_1" class="gform_button gform-theme-button btn btn--accent" data-track="lead_submit">
+                        <span>Richiedi la valutazione</span>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Identificativo del lead: in Gravity Forms è un campo
+                     nascosto popolato da gform_field_value_effegi_lead_uid.
+                     Serve a ricondurre allo stesso contatto i salvataggi
+                     parziali dei tre step (vedi GRAVITY-FORMS.md). -->
+                <input type="hidden" name="input_20" id="input_1_20" data-lead-uid value="">
+              </form>
+
+              <!-- Conferma: in Gravity Forms è la "Confirmation" del form. -->
+              <!-- Schermata di chiusura. In Gravity Forms è la Confirmation
+                   del form: stesso testo, stessa impaginazione. Dice cosa
+                   succede adesso e in quanto tempo, che è l'unica cosa che
+                   interessa a chi ha appena lasciato i propri dati. -->
+              <div class="gform_confirmation_wrapper" data-quiz-confirmation hidden>
+                <span class="quiz-done__mark" aria-hidden="true"></span>
+                <p class="quiz-done__eyebrow">Richiesta ricevuta</p>
+                <h2 class="quiz-done__title">Ci pensiamo noi</h2>
+                <p class="gform_confirmation_message">
+                  Un <strong>consulente Effegi</strong> della tua zona ti ricontatta
+                  con la <strong>valutazione del tuo immobile</strong>.
+                </p>
+
+                <!-- Riepilogo di quello che è stato inviato: chiude il cerchio
+                     e fa da ricevuta. Nessun dato personale, solo l'immobile. -->
+                <p class="quiz-done__recap" data-quiz-done-recap></p>
+
+                <p class="quiz-done__aside">Gratuita e senza impegno</p>
+
+                <!-- Due uscite, non un vicolo cieco: chi ha appena lasciato i
+                     dati può chiudere o continuare a leggere la pagina. -->
+                <div class="quiz-done__actions">
+                  <button type="button" class="btn btn--accent btn--sm quiz-done__close" data-quiz-close>
+                    <span>Chiudi</span>
+                  </button>
+                  <a class="btn btn--ghost btn--sm quiz-done__link" href="#recensioni" data-quiz-close>
+                    <span>Leggi le recensioni</span>
+                  </a>
+                </div>
+              </div>
+
             </div>
 
           </div>
@@ -225,9 +491,9 @@
          02 consulenza e tutela -> consulenti Effegi con i clienti (foto reale);
          03 conoscenza del territorio -> tessuto urbano costruito. -->
     <figure class="manifesto__visual" data-reveal="wipe" data-wipe="left">
-      <img class="manifesto__visual-img is-active" data-pillar-img="1" src="assets/img/foto/pilastro-1-valorizzazione.webp" alt="Un fotografo riprende con il cavalletto il soggiorno di un appartamento preparato per la vendita" width="1536" height="1024" loading="lazy">
-      <img class="manifesto__visual-img" data-pillar-img="2" src="assets/img/foto/pilastro-2-consulenza.webp" alt="Una consulente illustra planimetrie e documenti a due clienti seduti al tavolo" width="1536" height="1024" loading="lazy">
-      <img class="manifesto__visual-img" data-pillar-img="3" src="assets/img/foto/pilastro-3-territorio.webp" alt="Veduta dall&rsquo;alto di un centro abitato italiano, con la piazza, la chiesa e il campanile" width="1536" height="1024" loading="lazy">
+      <img class="manifesto__visual-img is-active" data-pillar-img="1" src="assets/imgdev/Foto2Valorizzazionerealedellimmobile.webp" alt="Un fotografo riprende con il cavalletto il soggiorno di un appartamento preparato per la vendita" width="1536" height="1024" loading="lazy">
+      <img class="manifesto__visual-img" data-pillar-img="2" src="assets/imgdev/Foto3Consulenzatrasparenteetutela.webp" alt="Una consulente illustra planimetrie e documenti a due clienti seduti al tavolo" width="1536" height="1024" loading="lazy">
+      <img class="manifesto__visual-img" data-pillar-img="3" src="assets/imgdev/Foto4Conoscenza-del-territorio.webp" alt="Veduta dall&rsquo;alto di un centro abitato italiano, con la piazza, la chiesa e il campanile" width="1536" height="1024" loading="lazy">
       <figcaption class="manifesto__visual-tag" data-pillar-tag>01 — Valorizzazione reale dell'immobile</figcaption>
     </figure>
 
@@ -381,9 +647,9 @@
          02 profilo dell'immobile -> l'interno, cioè ciò che si sta descrivendo;
          03 recapiti -> il consulente Effegi che ricontatta (foto reale). -->
     <figure class="process-section__visual" data-reveal="wipe" data-wipe="right" data-step-visual>
-      <img class="process-section__img is-active" data-step-img="1" src="assets/img/foto/passo-1-dati.webp" alt="Una persona compila al computer portatile il modulo con comune, indirizzo e civico" width="1536" height="1024" loading="lazy">
-      <img class="process-section__img" data-step-img="2" src="assets/img/foto/passo-2-invio.webp" alt="Uno smartphone mostra la conferma della richiesta inviata" width="1536" height="1024" loading="lazy">
-      <img class="process-section__img" data-step-img="3" src="assets/img/foto/passo-3-ricontatto.webp" alt="Una consulente al telefono alla scrivania richiama un cliente" width="1536" height="1024" loading="lazy">
+      <img class="process-section__img is-active" data-step-img="1" src="assets/imgdev/Foto5Inserisciidatideltuoimmobile.webp" alt="Una persona compila al computer portatile il modulo con comune, indirizzo e civico" width="1536" height="1024" loading="lazy">
+      <img class="process-section__img" data-step-img="2" src="assets/imgdev/Foto6Inviilarichiestainunminuto.webp" alt="Uno smartphone mostra la conferma della richiesta inviata" width="1536" height="1024" loading="lazy">
+      <img class="process-section__img" data-step-img="3" src="assets/imgdev/Foto7Tiricontattiamonoi.webp" alt="Una consulente al telefono alla scrivania richiama un cliente" width="1536" height="1024" loading="lazy">
       <span class="process-section__marker" aria-hidden="true"><span data-step-marker>01</span><span class="process-section__marker-of">/03</span></span>
     </figure>
   </section>
@@ -392,8 +658,9 @@
 
   <!-- ============================================================
        RECENSIONI — dati reali (data-to-value verificati sul sito live)
-       + 3 video-testimonianze reali dal canale YouTube Effegi. Sezione
-       anthracite con numeri/riquadri per dare più peso visivo.
+       + recensioni Google dalla scheda Google Business, tramite widget
+       Elementor Pro. Sezione anthracite con numeri/riquadri per dare
+       più peso visivo.
        ============================================================ -->
   <section class="reviews-section" id="recensioni" data-reveal-block>
     <div class="container reviews-section__top">
@@ -423,39 +690,124 @@
       </div>
     </div>
 
-    <!-- Un player grande + rail di miniature, a tutta larghezza di viewport
-         (fuori dal container): si sceglie la testimonianza dal rail, il video
-         parte solo al click sul player (facade YouTube: nessun iframe
-         caricato prima dell'interazione). -->
-    <div class="video-stage" data-video-stage>
-      <button type="button" class="video-card video-card--stage" data-yt="rdGwCucH1iU"
-              data-reveal="stagger" data-reveal-order="1"
-              aria-label="Riproduci la video-testimonianza 1 di 3">
-        <img src="https://img.youtube.com/vi/rdGwCucH1iU/hqdefault.jpg" alt="" loading="lazy" data-stage-img>
-        <span class="video-card__play" aria-hidden="true">▶</span>
-        <span class="video-card__label">Video-testimonianza cliente <span data-stage-index>1</span>/3</span>
-      </button>
+    <!-- ------------------------------------------------------------
+         RECENSIONI GOOGLE
+         In produzione questo blocco è il widget "Google Reviews" di
+         Elementor Pro (oppure un plugin equivalente), che legge le
+         recensioni in tempo reale dalla scheda Google Business di Effegi.
+         Serve il Place ID della scheda, da inserire in data-place-id.
 
-      <ul class="video-rail" data-reveal="stagger" data-reveal-order="2">
-        <li>
-          <button type="button" class="video-thumb is-active" data-yt="rdGwCucH1iU" data-index="1" aria-pressed="true">
-            <img src="https://img.youtube.com/vi/rdGwCucH1iU/hqdefault.jpg" alt="" loading="lazy">
-            <span class="video-thumb__n">01</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="video-thumb" data-yt="j4ILFe1ePBg" data-index="2" aria-pressed="false">
-            <img src="https://img.youtube.com/vi/j4ILFe1ePBg/hqdefault.jpg" alt="" loading="lazy">
-            <span class="video-thumb__n">02</span>
-          </button>
-        </li>
-        <li>
-          <button type="button" class="video-thumb" data-yt="emKOL6tczQY" data-index="3" aria-pressed="false">
-            <img src="https://img.youtube.com/vi/emKOL6tczQY/hqdefault.jpg" alt="" loading="lazy">
-            <span class="video-thumb__n">03</span>
-          </button>
-        </li>
-      </ul>
+         PERCHÉ QUI I RIQUADRI SONO VUOTI: le recensioni sono contenuti
+         scritti da persone reali. Non vengono inventate per riempire un
+         mockup — arrivano dal plugin quando la landing sarà in WordPress.
+         Fino ad allora il blocco mostra il proprio stato di attesa.
+
+         Le tre agenzie hanno schede Google distinte: va deciso se mostrare
+         una sola scheda o unire le recensioni delle tre.
+         ------------------------------------------------------------ -->
+    <!-- ATTENZIONE — I TESTI QUI SOTTO SONO FINTI.
+         Sono una simulazione grafica chiesta per valutare l'impaginazione,
+         non recensioni reali: nomi, date e testi sono segnaposto. La fascia
+         gialla in cima al blocco lo dichiara a schermo, e resta visibile
+         finché data-place-id è vuoto. NON PUBBLICARE la pagina in questo
+         stato: appena il Place ID è inserito, il widget Google Reviews
+         sostituisce tutto questo con le recensioni vere e la simulazione
+         sparisce da sé. -->
+    <div class="reviews-grid" data-google-reviews data-place-id="" data-reveal="stagger" data-reveal-order="1">
+
+      <p class="reviews-grid__note">Anteprima: contenuti simulati, in attesa del collegamento alla scheda Google.</p>
+
+      <article class="review-card">
+        <header class="review-card__head">
+          <span class="review-card__avatar" aria-hidden="true">G</span>
+          <span class="review-card__who">
+            <span class="review-card__name">Giulia M.</span>
+            <span class="review-card__date">2 mesi fa</span>
+          </span>
+        </header>
+        <p class="review-card__stars" aria-label="5 stelle su 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></p>
+        <p class="review-card__text">
+          Avevamo un trilocale da vendere e non sapevamo da che parte iniziare. La valutazione
+          è arrivata in pochi giorni, con i prezzi degli immobili simili in zona spiegati uno
+          per uno. Venduto in cinque settimane al prezzo che ci avevano indicato.
+        </p>
+      </article>
+
+      <article class="review-card">
+        <header class="review-card__head">
+          <span class="review-card__avatar" aria-hidden="true">M</span>
+          <span class="review-card__who">
+            <span class="review-card__name">Marco B.</span>
+            <span class="review-card__date">3 settimane fa</span>
+          </span>
+        </header>
+        <p class="review-card__stars" aria-label="5 stelle su 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></p>
+        <p class="review-card__text">
+          Professionali e diretti. Nessuna promessa gonfiata per prendere l&rsquo;incarico.
+        </p>
+      </article>
+
+      <article class="review-card">
+        <header class="review-card__head">
+          <span class="review-card__avatar" aria-hidden="true">A</span>
+          <span class="review-card__who">
+            <span class="review-card__name">Anna R.</span>
+            <span class="review-card__date">1 mese fa</span>
+          </span>
+        </header>
+        <p class="review-card__stars" aria-label="5 stelle su 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></p>
+        <p class="review-card__text">
+          Ho ereditato una casa insieme a mio fratello e la situazione era complicata anche dal
+          punto di vista burocratico. Ci hanno seguiti fino al rogito, tenendo informati tutti
+          e due allo stesso modo. Da segnalare la disponibilità anche fuori orario.
+        </p>
+      </article>
+
+      <article class="review-card">
+        <header class="review-card__head">
+          <span class="review-card__avatar" aria-hidden="true">S</span>
+          <span class="review-card__who">
+            <span class="review-card__name">Stefano C.</span>
+            <span class="review-card__date">4 mesi fa</span>
+          </span>
+        </header>
+        <p class="review-card__stars" aria-label="4 stelle su 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9734;</span></p>
+        <p class="review-card__text">
+          Buon lavoro sulla valutazione e sulle foto dell&rsquo;annuncio. I tempi sono stati un
+          po&rsquo; più lunghi del previsto, ma siamo stati sempre aggiornati.
+        </p>
+      </article>
+
+      <article class="review-card">
+        <header class="review-card__head">
+          <span class="review-card__avatar" aria-hidden="true">L</span>
+          <span class="review-card__who">
+            <span class="review-card__name">Laura P.</span>
+            <span class="review-card__date">2 settimane fa</span>
+          </span>
+        </header>
+        <p class="review-card__stars" aria-label="5 stelle su 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></p>
+        <p class="review-card__text">
+          Conoscono il quartiere meglio di chiunque altro. Ci hanno consigliato di aspettare
+          due mesi prima di mettere in vendita e avevano ragione.
+        </p>
+      </article>
+
+      <article class="review-card">
+        <header class="review-card__head">
+          <span class="review-card__avatar" aria-hidden="true">D</span>
+          <span class="review-card__who">
+            <span class="review-card__name">Davide L.</span>
+            <span class="review-card__date">5 mesi fa</span>
+          </span>
+        </header>
+        <p class="review-card__stars" aria-label="5 stelle su 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></p>
+        <p class="review-card__text">
+          Prima valutazione gratuita e senza pressioni: ci siamo presi un mese per decidere e
+          non ci ha chiamato nessuno a insistere. Quando siamo tornati erano ancora lì.
+        </p>
+      </article>
+
     </div>
   </section>
 
@@ -637,7 +989,7 @@
 
     <div class="site-footer__top">
       <a href="#hero" class="site-footer__brand" aria-label="Effegi Gruppo Immobiliare — torna in cima">
-        <img src="assets/img/effegi-logo.webp" alt="Effegi Gruppo Immobiliare" width="120" height="120">
+        <img src="logoeffigi.webp" alt="Effegi Gruppo Immobiliare" width="120" height="120">
       </a>
       <p class="site-footer__tagline">Effegi Gruppo Immobiliare è leader nella consulenza immobiliare su misura, specializzato in compravendita di unità abitative residenziali e nuove costruzioni.</p>
     </div>
