@@ -2842,7 +2842,11 @@ body.is-quiz-fullscreen { overflow: hidden; overflow-x: hidden; }
 @media (prefers-reduced-motion: reduce) { .gf_progressbar_seg { transition: none; } }
 
 /* --- la domanda è l'elemento principale della schermata --- */
-.gform_page[data-quiz-page="1"] .gfield_label,
+/* Lo stile da domanda grande resta solo alle sottodomande (.quiz-question).
+   Quando la prima scheda era una domanda sola, anche le sue etichette lo
+   usavano; ora la prima scheda ha tre campi normali (Comune, Indirizzo,
+   Civico) e le loro etichette devono leggersi come quelle degli altri due
+   step, non come titoli. */
 .quiz-question {
   font-family: var(--font-heading);
   font-weight: 700;
@@ -2851,8 +2855,9 @@ body.is-quiz-fullscreen { overflow: hidden; overflow-x: hidden; }
   color: var(--c-anthracite);
   letter-spacing: -0.01em;
 }
-/* L'asterisco non deve gridare accanto a una domanda grande. */
-.gform_page[data-quiz-page="1"] .gfield_required_asterisk { display: none; }
+/* L.asterisco torna visibile anche sulla prima scheda: i tre campi sono
+   obbligatori come quelli delle altre schede, e nasconderne il segno era
+   un residuo di quando la prima scheda era una sola domanda. */
 
 /* --- card: barra d'accento a sinistra, come i punti del manifesto --- */
 .gfield_radio--cards label { position: relative; overflow: hidden; }
@@ -3958,7 +3963,7 @@ body:not(.is-quiz-fullscreen) .gform_page_fields { min-height: auto; }
   #field_1_7 { grid-column: span 3; }
   #field_1_8 { grid-column: span 6; }
   #field_1_9 { grid-column: 1 / -1; }
-  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-height: 470px) {
   .is-quiz-fullscreen .hero__panel--glass { padding-block: var(--space-2); }
@@ -4040,7 +4045,7 @@ body:not(.is-quiz-fullscreen) .gform_page_fields { min-height: auto; }
 @media (min-width: 480px) and (max-height: 620px) {
   #field_1_8,
   #field_1_9 { grid-column: 1 / -1; }
-  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .is-quiz-fullscreen #field_1_8 .gfield_radio--cards label,
   .is-quiz-fullscreen #field_1_9 .gfield_radio--cards label { min-height: 34px; }
 }
@@ -4056,7 +4061,7 @@ body:not(.is-quiz-fullscreen) .gform_page_fields { min-height: auto; }
    l'etichetta sta su una riga e la fila torna bassa — e' il
    "ridimensionamento" delle chip, non una rinuncia sugli spazi del form. */
 @media (min-width: 480px) and (max-height: 620px) {
-  #field_1_9 .gfield_radio--cards label { padding-inline: 12px; }
+  #field_1_9 .gfield_radio--cards label { padding-inline: var(--space-3); }
 }
 
 /* Il blocco qui sopra (<=620px) riscrive anche il caso <=470, che e'
@@ -4072,3 +4077,522 @@ body:not(.is-quiz-fullscreen) .gform_page_fields { min-height: auto; }
   .is-quiz-fullscreen #field_1_8 .gfield_radio--cards label,
   .is-quiz-fullscreen #field_1_9 .gfield_radio--cards label { min-height: 30px; }
 }
+
+/* =================================================================
+   STEP 2: CONTATORI, SUFFISSO E CASELLE MULTIPLE
+   =================================================================
+   Tre elementi che lo step 2 del form Effegi ha e che Gravity Forms non
+   offre come tipo di campo: il contatore con i due pulsanti (resta un
+   campo Number), il suffisso m2 dentro il campo superficie e le caselle
+   multiple delle dotazioni, che qui riusano l aspetto delle card.
+   ================================================================= */
+.quiz-stepper {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+.quiz-stepper__btn {
+  border: 1.5px solid var(--c-border);
+  background: var(--c-white);
+  color: var(--c-anthracite);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-standard),
+              background var(--dur-fast) var(--ease-standard);
+}
+.quiz-stepper__btn:hover { border-color: var(--c-anthracite); background: var(--c-surface-alt); }
+.quiz-stepper__input {
+  width: 100%;
+  min-height: 52px;
+  text-align: center;
+  padding-inline: var(--space-2);
+  background: var(--c-white);
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--c-anthracite);
+}
+.quiz-stepper__input::-webkit-outer-spin-button,
+.quiz-stepper__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.quiz-stepper__input[type="number"] { -moz-appearance: textfield; }
+
+/* Suffisso dentro il campo: e un pseudo-elemento, quindi non entra mai nel
+   valore inviato. Il padding a destra lascia il posto. */
+.quiz-field--suffix { position: relative; }
+.quiz-field--suffix::after {
+  content: attr(data-suffix);
+  position: absolute;
+  right: var(--space-4);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: var(--c-dark-gray);
+  pointer-events: none;
+}
+.quiz-field--suffix input { padding-right: calc(var(--space-4) + 3ch); }
+
+/* Dotazioni: stesse card delle scelte singole, con la spunta a destra
+   quando sono attive. Due o tre per riga secondo lo spazio. */
+.gfield_checkbox.gfield_radio--cards { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.gfield_checkbox.gfield_radio--cards input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.gfield_checkbox.gfield_radio--cards input:checked + label {
+  border-color: var(--c-anthracite);
+  border-width: 2px;
+  background: var(--c-surface-alt);
+  font-weight: 700;
+}
+.gfield_checkbox.gfield_radio--cards input:checked + label::after {
+  content: "";
+  width: 6px;
+  height: 11px;
+  margin-left: auto;
+  border: solid var(--c-anthracite);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -2px);
+}
+.gfield_checkbox.gfield_radio--cards input:checked + label {
+  justify-content: space-between;
+  text-align: left;
+}
+
+/* =================================================================
+   DOTAZIONI: TENDINA A SCELTA MULTIPLA
+   =================================================================
+   Sotto resta un campo Checkboxes di Gravity Forms. Il pulsante ha lo
+   stesso aspetto delle altre tende del form, cosi la riga di campi legge
+   come una sola famiglia; il pannello e un riquadro che si apre sopra i
+   campi successivi, non li spinge in basso.
+   ================================================================= */
+.quiz-multi { position: relative; }
+.quiz-multi__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-white);
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 16px;
+  text-align: left;
+  color: var(--c-light-gray);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-standard);
+}
+.quiz-multi.is-filled .quiz-multi__toggle { color: var(--c-anthracite); }
+.quiz-multi__toggle:hover { border-color: var(--c-dark-gray); }
+.quiz-multi.is-open .quiz-multi__toggle { border-color: var(--c-anthracite); border-width: 2px; }
+/* Stessa freccia delle altre tende, disegnata e non un carattere. */
+.quiz-multi__toggle::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border: solid var(--c-anthracite);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-2px, -2px);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.quiz-multi.is-open .quiz-multi__toggle::after { transform: rotate(-135deg) translate(-3px, -3px); }
+
+.quiz-multi__panel {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  display: grid;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: var(--space-2);
+  background: var(--c-white);
+  border: 1.5px solid var(--c-anthracite);
+  box-shadow: 0 12px 28px rgba(43, 49, 49, 0.14);
+}
+.quiz-multi__panel[hidden] { display: none; }
+.quiz-multi__panel .gchoice { margin: 0; }
+.quiz-multi__panel label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 16px;
+  color: var(--c-anthracite);
+  cursor: pointer;
+}
+.quiz-multi__panel label:hover { background: var(--c-surface-alt); }
+.quiz-multi__panel input[type="checkbox"] {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--c-anthracite);
+}
+
+/* =================================================================
+   CARD DI SCELTA: PIU RESPIRO QUANDO SONO ATTIVE
+   =================================================================
+   Su "Nuovo/Ristrutturato" il testo arrivava vicino alla cornice al
+   passaggio del mouse e alla selezione: la card e alta quanto il testo e
+   larga quanto la colonna, quindi l unico margine che si vede e quello
+   interno. Sale a 24px orizzontali e 12 verticali.
+   ================================================================= */
+.gfield_radio--cards:not(.gfield_radio--compact) label {
+  padding-inline: var(--space-5);
+  padding-block: var(--space-3);
+}
+.gfield_radio--cards:not(.gfield_radio--compact) input:checked + label::after { margin-left: var(--space-3); }
+/* Il pannello della hero ritagliava la tendina delle dotazioni, che si apre
+   sopra i campi successivi e puo sporgere dal bordo inferiore della card.
+   Niente altro, dentro la card, ha bisogno di essere ritagliato. */
+body:not(.is-quiz-fullscreen) .hero__panel--glass { overflow: visible; }
+/* Sei voci da 44px piu il margine interno: con 340px non serve scorrere
+   dentro la tendina, che su una lista cosi corta e solo fastidio. */
+.quiz-multi__panel { max-height: 340px; }
+/* La casella e fratello della label, non figlio: senza una riga flex sul
+   contenitore finivano su due righe e ogni voce occupava 78px invece di 44.
+   Da qui i 470px di contenuto in un pannello alto 340. */
+.quiz-multi__panel .gchoice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding-inline: var(--space-3);
+}
+.quiz-multi__panel .gchoice:hover { background: var(--c-surface-alt); }
+.quiz-multi__panel label {
+  flex: 1 1 auto;
+  padding: 0;
+  background: none;
+}
+.quiz-multi__panel label:hover { background: none; }
+/* Con 24px di margine interno "Nuovo/Ristrutturato" non sta in una colonna
+   da 159px: il testo usciva dalla card e la spunta finiva fuori bordo.
+   La condizione passa a colonne piu larghe, due per riga: l etichetta piu
+   lunga ci sta per intero e il margine resta quello chiesto. */
+#field_1_9 .gfield_radio--cards { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* =================================================================
+   IL FORM PRENDE LA LARGHEZZA DELLA PAGINA
+   =================================================================
+   La card era larga 560px e centrata dentro un contenitore da 1200: tutta
+   la larghezza che avanzava non serviva a nessuno, mentre lo step 2 doveva
+   impilare otto campi in colonna e usciva dalla schermata. Ora la card si
+   allinea agli stessi bordi delle sezioni sotto (il contenitore della
+   pagina) e i campi si dispongono in righe da tre o quattro.
+   Il margine laterale legato alla lente non ha piu motivo di esistere: la
+   lente e stata rimossa.
+   ================================================================= */
+@media (min-width: 640px) {
+  .hero__lens-wrap {
+    max-width: none;
+    margin-inline: 0;
+  }
+  /* Titolo e promessa non devono allungarsi quanto la card: una riga di
+     testo lunga 1200px non si legge. Restano sulla loro misura. */
+  .hero__panel-content > .eyebrow--band,
+  .hero__title,
+  .hero__lead { max-width: 46ch; }
+}
+
+/* Da qui in su c e spazio per tre o quattro campi affiancati. */
+@media (min-width: 1000px) {
+  /* Tre per riga. Locali e bagni non stanno piu. affiancati: nel DOM li
+     separa la superficie, cosi. anche l ordine di tabulazione corrisponde a
+     quello che si vede. Finiscono in diagonale, non uno accanto all altro. */
+  #field_1_1 { grid-column: span 3; }
+  #field_1_8 { grid-column: span 3; }
+  #field_1_6 { grid-column: span 3; }
+  #field_1_5 { grid-column: span 3; }
+  /* Ordine nel DOM: classe, condizione, dotazioni, tempistica. Le misure
+     seguono quell ordine, altrimenti la condizione a riga piena spezza la
+     fila e lascia buchi: classe 4 + condizione 8 chiudono una riga,
+     dotazioni 6 + tempistica 6 la successiva. */
+  #field_1_7 { grid-column: span 4; }
+  #field_1_9 { grid-column: span 8; }
+  /* Dotazioni e tempistica a meta. ciascuna: cosi. "Quando vuoi mettere
+     l immobile sul mercato?" sta su una riga sola invece di andare a capo. */
+  #field_1_10 { grid-column: span 6; }
+  #field_1_16 { grid-column: span 6; }
+  #field_1_9 .gfield_radio--cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+  /* Step 3: i quattro campi del contatto stanno su due righe. */
+  #field_1_11 { grid-column: span 6; }
+  #field_1_13 { grid-column: span 6; }
+  #field_1_14 { grid-column: span 6; }
+  /* Il consenso sta sotto le caselle, su una riga sola. */
+  #field_1_15 { grid-column: 1 / -1; }
+}
+
+/* =================================================================
+   TESTATA DELLA CARD SU DUE COLONNE
+   =================================================================
+   Con la card larga quanto la pagina, titolo e promessa incolonnati
+   sprecavano 52px di altezza per tenere una riga di testo lunga meta
+   della card. Affiancati occupano una riga sola e quei px vanno al form,
+   che e quello che deve stare nella schermata.
+   ================================================================= */
+@media (min-width: 1000px) {
+  .hero__panel-content {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    align-items: end;
+  }
+  .hero__panel-content > .eyebrow--band { grid-column: 1 / -1; justify-self: start; }
+  .hero__title { grid-column: span 7; max-width: none; margin-bottom: 0; }
+  .hero__lead { grid-column: span 5; max-width: none; margin-bottom: 0; padding-bottom: 4px; }
+  .hero__panel-content > #valuation-quiz,
+  .hero__panel-content > .gform_wrapper,
+  .hero__panel-content > form,
+  .hero__panel-content > .gform_confirmation_wrapper { grid-column: 1 / -1; }
+}
+
+/* Schermi larghi ma bassi (1280x720 e simili): il titolo scende di un
+   gradino. Resta il titolo piu grande della pagina, non diventa testo. */
+@media (min-width: 1000px) and (max-height: 820px) {
+  .hero__title { font-size: clamp(32px, 3.4vw, 46px); }
+  .hero__inner { padding-top: calc(var(--header-h) + var(--space-2)); }
+}
+/* Mancavano 7px allo step 2 a 1280x720: li danno le card della condizione,
+   che a questa altezza non hanno bisogno di 56px. */
+@media (min-width: 1000px) and (max-height: 820px) {
+  .gfield_radio--cards:not(.gfield_radio--compact) label { min-height: 48px; }
+  .gform_page_footer { margin-top: var(--space-3); }
+}
+
+/* =================================================================
+   PRIMA SCHEDA: TESTATA CENTRATA, CAMPI DI MISURA UMANA
+   =================================================================
+   Con la card larga quanto la pagina i tre campi dell indirizzo
+   diventavano righe da 1100px, con il placeholder perso a sinistra e un
+   bersaglio enorme per tre parole. Qui il blocco si stringe e si centra,
+   e con lui la testata: occhiello, titolo e promessa sullo stesso asse.
+   Vale solo sulla prima scheda, dove i campi sono tre: le altre due usano
+   tutta la larghezza, che li serve davvero.
+   ================================================================= */
+@media (min-width: 1000px) {
+  /* La testata sta al centro su tutte e tre le schede, non solo sulla
+     prima: e. la stessa intestazione, non ha senso che si sposti mentre si
+     compila. width:100% con margin auto, non justify-items:center: con
+     quello la riga si restringeva al contenuto e il titolo andava su tre
+     righe. */
+  .hero__panel-content > .eyebrow--band { justify-self: center; }
+  .hero__title,
+  .hero__lead {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 70ch;
+    margin-inline: auto;
+    text-align: center;
+  }
+  #gform_page_1_1 .gform_fields,
+  #gform_page_1_1 .gform_page_footer,
+  #gform_page_1_1 .gf_progressbar_wrapper {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+  #gform_page_1_1 .gfield_label { text-align: left; }
+}
+/* La barra di avanzamento segue la stessa misura della scheda attiva. */
+@media (min-width: 1000px) {
+  .hero__panel-content:has(#gform_page_1_1:not([style*="display: none"])) .gf_progressbar_wrapper {
+    max-width: 720px;
+    margin-inline: auto;
+  }
+}
+/* Pannello verso l alto quando sotto non c e spazio (vedi initValuationQuiz). */
+.quiz-multi.is-up .quiz-multi__panel {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+/* =================================================================
+   SCHERMATA FINALE: RIMESSA IN ORDINE
+   =================================================================
+   Quando il quiz andava a tutto schermo, occhiello, titolo e promessa
+   della hero sparivano con una regola legata a quella modalita. Tolta la
+   modalita., quelle tre righe sono rimaste a schermo sopra la conferma:
+   nello screenshot si vede la tag chiara in alto a sinistra, un buco dove
+   stava il titolo e la promessa in grigio su fondo scuro, illeggibile.
+   Qui la schermata di arrivo torna a essere una cosa sola: la card diventa
+   scura, la testata della hero sparisce, e resta il blocco centrato.
+   ================================================================= */
+.is-quiz-done .eyebrow--band,
+.is-quiz-done .hero__title,
+.is-quiz-done .hero__lead { display: none; }
+
+/* La griglia a 12 colonne della testata non serve piu: qui c e un blocco
+   solo, e deve stare al centro di una card che ora e alta quanto il suo
+   contenuto. */
+.is-quiz-done .hero__panel-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: min(60vh, 520px);
+}
+.is-quiz-done .gform_confirmation_wrapper {
+  height: auto;
+  margin-inline: auto;
+  padding-block: var(--space-7);
+}
+
+/* Il segno di spunta non e un riquadro pieno appoggiato sul fondo scuro:
+   diventa un cerchio in filo avorio, piu quieto e piu coerente con il
+   resto della pagina, dove nulla e un blocco di colore isolato. */
+.is-quiz-done .quiz-done__mark {
+  width: 56px;
+  height: 56px;
+  background: none;
+  border: 2px solid var(--c-ivory);
+  border-radius: 50%;
+}
+.is-quiz-done .quiz-done__mark::after {
+  border-color: var(--c-ivory);
+}
+
+/* Gerarchia: occhiello piccolo e spaziato, titolo grande, messaggio su
+   due righe larghe, ricevuta e riga di servizio sotto. Le misure in ch
+   tengono il testo su poche righe piene invece che su molte corte. */
+.is-quiz-done .quiz-done__eyebrow {
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  color: var(--c-light-gray);
+}
+.is-quiz-done .quiz-done__title { margin-top: var(--space-2); }
+.is-quiz-done .gform_confirmation_message {
+  max-width: 44ch;
+  color: var(--c-light-gray);
+}
+.is-quiz-done .quiz-done__recap {
+  margin-top: var(--space-4);
+  border-color: rgba(191, 187, 162, 0.45);
+}
+.is-quiz-done .quiz-done__aside {
+  margin-top: var(--space-1);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+}
+.is-quiz-done .quiz-done__actions { margin-top: var(--space-5); }
+/* A 1280x720 lo step 2 sforava di 23px: la terza riga e alta quanto la
+   domanda sulla tempistica, la cui etichetta va a capo. Si recupera
+   dall aria, non dal testo. */
+@media (min-width: 1000px) and (max-height: 820px) {
+  .gform_fields { row-gap: var(--space-2); }
+  .gf_progressbar_wrapper { margin-bottom: var(--space-1); }
+  .hero__panel-content > .eyebrow--band { margin-bottom: var(--space-2); }
+  .gfield_radio--cards:not(.gfield_radio--compact) label { min-height: 44px; }
+  .gform_page_footer { margin-top: var(--space-2); }
+}
+
+/* La riga legale della prima scheda sta sotto il pulsante, al centro. */
+.gform_page_footer .form-card__legal--left { text-align: center; }
+@media (min-width: 1000px) {
+  #gform_page_1_1 .gform_page_footer { justify-content: center; }
+}
+
+/* L occhiello non si centrava: .hero__panel-content non e una griglia ma un
+   blocco (lo impone la regola che toglie la vecchia modalita a tutto
+   schermo, scritta piu avanti nel foglio e quindi vincente), e dentro un
+   blocco justify-self non significa niente. Essendo inline-flex non lo
+   centrano nemmeno i margini automatici: diventa un flex di larghezza pari
+   al contenuto, e allora i margini automatici funzionano. */
+@media (min-width: 640px) {
+  .hero__panel-content > .eyebrow--band {
+    display: flex;
+    width: fit-content;
+    margin-inline: auto;
+  }
+}
+/* Il pannello non deve mai essere piu alto dello spazio disponibile: su
+   telefono, aprendosi verso l alto, finiva sotto l intestazione fissa. */
+.quiz-multi__panel { max-height: min(340px, 46vh); }
+/* Se anche cosi il pannello dovesse sporgere, deve comunque stare SOPRA la
+   sezione seguente: quella viene dopo nel documento e senza un contesto di
+   impilamento proprio la coprirebbe. */
+.hero__panel--glass { position: relative; z-index: 2; }
+.quiz-multi.is-open { z-index: 20; }
+
+/* =================================================================
+   LARGHEZZE INTERMEDIE (640–999px): DUE CAMPI PER RIGA
+   =================================================================
+   Qui ci finiscono i tablet in verticale e i desktop con lo zoom al 150%
+   (1366x768 al 150% fa 911x512). Senza questa fascia il form restava a
+   colonna singola come su telefono e diventava lunghissimo. Due per riga,
+   con la superficie a tutta larghezza fra locali e bagni: serve anche a
+   tenerli lontani, che e la ragione per cui li abbiamo separati.
+   ================================================================= */
+@media (min-width: 640px) and (max-width: 999px) {
+  #field_1_1 { grid-column: span 6; }
+  #field_1_8 { grid-column: span 6; }
+  #field_1_6 { grid-column: 1 / -1; }
+  #field_1_5 { grid-column: span 6; }
+  #field_1_7 { grid-column: span 6; }
+  #field_1_9 { grid-column: 1 / -1; }
+  #field_1_10 { grid-column: span 6; }
+  #field_1_16 { grid-column: span 6; }
+  #field_1_11 { grid-column: span 6; }
+  #field_1_13 { grid-column: span 6; }
+  #field_1_14 { grid-column: span 6; }
+  #field_1_15 { grid-column: 1 / -1; }
+}
+/* La regola che centra l occhiello ha la stessa specificita di quella che
+   lo nasconde a invio avvenuto ed e scritta dopo, quindi vinceva: sulla
+   schermata finale la tag tornava a comparire. Qui si chiude il conto. */
+.is-quiz-done .hero__panel-content > .eyebrow--band { display: none; }
+
+/* =================================================================
+   TESTATA CENTRATA A OGNI LARGHEZZA
+   =================================================================
+   Occhiello, titolo, promessa e la riga "Gratuita, confidenziale e senza
+   impegno" stanno sull asse centrale della card su tutti i breakpoint,
+   telefono compreso: prima il centraggio partiva da 1000px (titolo e
+   promessa) e da 640 (occhiello), quindi su telefono e tablet la testata
+   restava a sinistra mentre sul desktop era centrata.
+   Le etichette dei campi restano allineate a sinistra: sono istruzioni da
+   leggere accanto al campo, non un blocco di testata.
+   ================================================================= */
+.hero__panel-content > .eyebrow--band {
+  display: flex;
+  width: fit-content;
+  margin-inline: auto;
+}
+.hero__title,
+.hero__lead { text-align: center; }
+.gform_page_footer .form-card__legal { text-align: center; }
+.gfield_label,
+.quiz-question,
+.gfield_consent_label,
+.quiz-recap { text-align: left; }
+/* Altri residui della prima scheda quando era una domanda sola: le etichette
+   avevano corpi fuori scala (17-18px) definiti in varie fasce di altezza.
+   Ora seguono le etichette degli altri step. */
+.gform_page[data-quiz-page="1"] .gfield_label { font-size: 16px; }
+
+/* =================================================================
+   CONSENSO: CASELLA E TESTO SULLA STESSA RIGA
+   =================================================================
+   La casella era ancorata in alto (align-items: start) con 2px di spinta:
+   dove il testo sta su una riga sola sembrava allineata, dove va a capo —
+   cioe su telefono e tablet — restava appesa in cima a un paragrafo, come
+   due elementi diversi invece che una riga di modulo.
+   Centrandola sul blocco di testo i due leggono come una cosa sola a
+   qualunque larghezza. La frase su telefono resta su tre righe: 85
+   caratteri a 16px non stanno in 280px, e il corpo del testo non si tocca.
+   ================================================================= */
+.ginput_container_consent {
+  align-items: center;
+}
+.ginput_container_consent input[type="checkbox"] { margin-top: 0; }

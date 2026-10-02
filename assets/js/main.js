@@ -884,7 +884,7 @@
    *   ricarica la pagina.
    * Dettagli e snippet PHP: GRAVITY-FORMS.md
    * ------------------------------------------------------------------- */
-  var QUIZ_STEP_LABELS = ["Il tuo immobile", "Dove si trova", "I tuoi dati"];
+  var QUIZ_STEP_LABELS = ["Dove si trova", "Caratteristiche", "I tuoi dati"];
 
   /* Tre schermate, tre step di raccolta dati: la mappa resta perche. rende
      esplicito il legame e regge se un domani una schermata venisse divisa.
@@ -895,7 +895,7 @@
      riceve solo dati non identificativi (tipologia, superficie, locali,
      stato, anno) piu' il comune, che era gia' ammesso come dato di
      localizzazione aggregato. */
-  var QUIZ_PII = ["input_3", "input_4", "input_11", "input_12", "input_13", "input_14"];
+  var QUIZ_PII = ["input_3", "input_4", "input_11", "input_13", "input_14"];
 
   function initValuationQuiz() {
     var root = document.getElementById("valuation-quiz");
@@ -951,6 +951,93 @@
       });
     });
 
+    /* --- contatori 2212/+ (locali, bagni) ---
+       In Gravity Forms questi restano due campi Number: i pulsanti sono
+       nostri e scrivono nel campo, che continua a funzionare da solo se il
+       JS non parte. Si emette "input" cosi. la validazione e il
+       salvataggio in sessione si comportano come con la tastiera. */
+    root.querySelectorAll("[data-stepper]").forEach(function (box) {
+      var campo = box.querySelector("input[type=number]");
+      if (!campo) return;
+      function passo(delta) {
+        var min = parseInt(campo.min, 10); if (isNaN(min)) min = 0;
+        var max = parseInt(campo.max, 10); if (isNaN(max)) max = 999;
+        var ora = parseInt(campo.value, 10); if (isNaN(ora)) ora = min;
+        campo.value = Math.max(min, Math.min(max, ora + delta));
+        campo.dispatchEvent(new Event("input", { bubbles: true }));
+        fireStart();
+      }
+      var giu = box.querySelector("[data-stepper-dec]");
+      var su = box.querySelector("[data-stepper-inc]");
+      if (giu) giu.addEventListener("click", function () { passo(-1); });
+      if (su) su.addEventListener("click", function () { passo(1); });
+    });
+
+    /* --- dotazioni: pannello a tendina su un campo Checkboxes ---
+       Il campo resta quello di Gravity Forms: qui si apre e si chiude il
+       pannello e si scrive sul pulsante quante voci sono selezionate. Se il
+       JS non parte il pannello e. gia. aperto nel markup (hidden lo mette
+       questo codice), quindi le caselle restano usabili. */
+    root.querySelectorAll("[data-multi]").forEach(function (box) {
+      var toggle = box.querySelector("[data-multi-toggle]");
+      var pannello = box.querySelector(".quiz-multi__panel");
+      var etichetta = box.querySelector("[data-multi-value]");
+      if (!toggle || !pannello || !etichetta) return;
+      var vuoto = box.getAttribute("data-multi-empty") || "Seleziona";
+
+      function aggiorna() {
+        var scelte = [].slice.call(pannello.querySelectorAll("input:checked"));
+        etichetta.textContent = scelte.length === 0 ? vuoto
+          : scelte.length === 1 ? scelte[0].value
+          : scelte.length + " selezionate";
+        box.classList.toggle("is-filled", scelte.length > 0);
+      }
+
+      function apri(stato) {
+        pannello.hidden = !stato;
+        toggle.setAttribute("aria-expanded", stato ? "true" : "false");
+        box.classList.toggle("is-open", stato);
+        if (!stato) { box.classList.remove("is-up"); return; }
+        // Se sotto non c.e. spazio il pannello si apre verso l.alto: aperto
+        // verso il basso usciva dal riquadro del form e finiva sulla
+        // fotografia, con meta. delle voci fuori dalla schermata.
+        box.classList.remove("is-up");
+        var r = toggle.getBoundingClientRect();
+        var h = pannello.offsetHeight;
+        // Il limite non e. solo il fondo della finestra ma anche quello della
+        // card: oltre il bordo il pannello finisce sotto la sezione
+        // successiva, che viene dopo nel documento e quindi ci passa sopra.
+        var card = box.closest(".hero__panel--glass");
+        var limiteGiu = window.innerHeight;
+        var limiteSu = 0;
+        if (card) {
+          var cr = card.getBoundingClientRect();
+          limiteGiu = Math.min(limiteGiu, cr.bottom);
+          limiteSu = Math.max(limiteSu, cr.top);
+        }
+        var sotto = limiteGiu - r.bottom;
+        var sopra = r.top - limiteSu;
+        if (sotto < h + 8 && sopra > sotto) box.classList.add("is-up");
+      }
+
+      apri(false);
+      aggiorna();
+
+      toggle.addEventListener("click", function () {
+        apri(pannello.hidden);
+        fireStart();
+      });
+      pannello.addEventListener("change", aggiorna);
+      // Clic fuori e Esc chiudono: un pannello aperto che resta aperto
+      // copre i campi sotto.
+      document.addEventListener("click", function (e) {
+        if (!box.contains(e.target)) apri(false);
+      });
+      box.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") { apri(false); toggle.focus(); }
+      });
+    });
+
     /* --- pulisci l'errore appena l'utente corregge --- */
     form.addEventListener("input", function (e) {
       if (e.target.closest(".gfield")) clearError(e.target.closest(".gfield"));
@@ -990,6 +1077,12 @@
         var riepilogo = confirmation.querySelector("[data-quiz-done-recap]");
         if (riepilogo) riepilogo.textContent = buildRecap();
         confirmation.hidden = false;
+        // Il quiz vive dentro la pagina: dopo l.invio la conferma puo. trovarsi
+        // fuori dalla parte visibile, e chi ha appena compilato non vedrebbe
+        // nessuna risposta. La si porta a schermo.
+        try {
+          confirmation.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+        } catch (err) { confirmation.scrollIntoView(); }
         // Schermata di chiusura in negativo: la marca la stessa classe sul
         // body, cosi. il pannello puo. cambiare fondo senza :has().
         document.body.classList.add("is-quiz-done");
@@ -1008,7 +1101,6 @@
     });
 
     function azzeraQuiz() {
-      document.body.classList.remove("is-quiz-fullscreen");
       document.body.classList.remove("is-quiz-done");
       if (confirmation) confirmation.hidden = true;
       form.hidden = false;
@@ -1028,11 +1120,6 @@
     }
 
     showPage(state.step ? state.step - 1 : 0, true);
-    // Se si passa da telefono a desktop (rotazione, finestra ridimensionata)
-    // il quiz deve uscire dalla modalita. a tutto schermo da se..
-    if (window.matchMedia("(max-width: 639px)").addEventListener) {
-      window.matchMedia("(max-width: 639px)").addEventListener("change", syncFullscreen);
-    }
 
     /* ------------------------------ navigazione --------------------- */
     function goNext() {
@@ -1052,31 +1139,14 @@
       if (current > 0) showPage(current - 1);
     }
 
-    /* Su telefono il quiz si prende tutta la pagina appena si esce dalla
-       prima domanda: lo step 2 da solo e' piu' alto del viewport, e dentro
-       il pannello della hero non ci starebbe mai. Tornando alla prima
-       domanda la hero riappare: l'utente non resta intrappolato. */
-    /* Dichiarata come funzione, non come var: showPage la chiama anche al
-       primo giro, che avviene prima di questa riga. Con una var sarebbe
-       ancora undefined e l'inizializzazione si fermerebbe qui. */
-    function syncFullscreen() {
-      // Vale su tutti i dispositivi: anche su desktop lo step 2 non entra
-      // nella schermata se il pannello deve convivere con titolo e promessa.
-      var attivo = current > 0;
-      document.body.classList.toggle("is-quiz-fullscreen", attivo);
-    }
-
-    /* Esc chiude il percorso a tutto schermo tornando alla domanda
-       precedente: su un pannello che copre lo schermo serve sempre
-       una via d'uscita da tastiera. */
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && document.body.classList.contains("is-quiz-fullscreen")) goPrev();
-    });
+    /* Il quiz vive dentro il pannello della hero, nella stessa pagina: non
+       prende piu. lo schermo intero. La modalita. a tutto schermo e. stata
+       rimossa su richiesta — restano i gradini di compattazione, che fanno
+       stare ogni scheda nello spazio disponibile senza coprire la pagina. */
 
     function showPage(index, silent) {
       current = Math.max(0, Math.min(index, pages.length - 1));
       pages.forEach(function (p, i) { p.style.display = i === current ? "" : "none"; });
-      syncFullscreen();
 
       var pct = Math.round(((current + 1) / pages.length) * 100);
       // I segmenti sono l'avanzamento che si vede; il testo percentuale resta
@@ -1173,15 +1243,17 @@
         tipologia: v.input_1 || undefined,
         comune: v.input_2 || undefined,
         superficie_mq: v.input_6 || undefined,
-        anno_costruzione: v.input_7 || undefined,
+        classe_energetica: v.input_7 || undefined,
         locali: v.input_8 || undefined,
-        stato: v.input_9 || undefined
+        bagni: v.input_5 || undefined,
+        stato: v.input_9 || undefined,
+        tempistica: v.input_16 || undefined
       };
     }
 
     function buildRecap() {
       var v = collect();
-      var parti = [v.input_1, v.input_2, v.input_6 ? v.input_6 + " mq" : "", v.input_8 ? v.input_8 + " locali" : ""];
+      var parti = [v.input_1, v.input_2, v.input_6 ? v.input_6 + " mq" : "", v.input_8 ? v.input_8 + (v.input_8 === "1" ? " locale" : " locali") : ""];
       return parti.filter(Boolean).join(" · ");
     }
 

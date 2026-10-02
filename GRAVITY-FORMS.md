@@ -65,34 +65,49 @@ add_action( 'gform_post_paging', function ( $form, $source_page, $current_page )
 
 Form ID 1, tre pagine, indicatore di avanzamento = **Progress Bar**.
 
-### Pagina 1 — Il tuo immobile
+### Pagina 1 — Dove si trova
+
+Ricalca lo step 1 del form Effegi oggi online su
+`immobilieffegi.it/vendita-immobili`.
 
 | ID | Campo | Tipo GF | Note |
 |----|-------|---------|------|
-| 1 | Che tipo di immobile vuoi valutare? | Radio Buttons | Appartamento · Casa indipendente · Villa o villetta a schiera · Altro |
 | 2 | Comune | Single Line Text | obbligatorio |
 | 3 | Indirizzo | Single Line Text | obbligatorio, larghezza 2/3 |
 | 4 | Civico | Single Line Text | obbligatorio, larghezza 1/3 |
 
+Pulsante: **Scopri ora**.
+
 ### Pagina 2 — Caratteristiche
+
+Ricalca lo step 2 del form Effegi.
 
 | ID | Campo | Tipo GF | Note |
 |----|-------|---------|------|
-| 6 | Superficie commerciale | Number | range 15–2000, suffisso mq |
-| 7 | Anno di costruzione | Drop Down | fasce + "Non lo so" |
-| 8 | Quanti locali? | Radio Buttons | 1 · 2 · 3 · 4 · 5 o più |
-| 9 | In che stato si trova? | Radio Buttons | Da ristrutturare · Buono · Ottimo · Nuovo o ristrutturato |
+| 1 | Tipologia | Drop Down | voci da verificare: la tenda era chiusa nello screenshot |
+| 8 | Numero di locali | Number | contatore meno/piu (i pulsanti sono JS nostro, vedi sezione 3) |
+| 5 | Numero di bagni | Number | contatore meno/piu |
+| 6 | Superficie | Number | suffisso m2 |
+| 7 | Classe energetica | Drop Down | classi APE da A4 a G + "Non lo so"; da verificare sul form originale |
+| 9 | Condizione dell.immobile | Radio Buttons | Nuovo/Ristrutturato · Buono/Abitabile · Da ristrutturare |
+| 10 | L.immobile dispone di: | Checkboxes | Arredamento · Impianto di riscaldamento · Giardino privato · Posto auto/Garage · Aria condizionata · Balcone/Terrazzo |
+| 16 | Quando vuoi mettere l.immobile sul mercato? | Radio Buttons | Il piu presto possibile · Entro 6 mesi · Entro 12 mesi · Non ora, voglio solo una valutazione |
+
+Pulsante: **Avanti**.
 
 ### Pagina 3 — I tuoi dati
 
+Ricalca il modulo contatti Effegi: un solo campo per nome e cognome.
+
 | ID | Campo | Tipo GF | Note |
 |----|-------|---------|------|
-| 11 | Nome | Single Line Text | larghezza 1/2 |
-| 12 | Cognome | Single Line Text | larghezza 1/2 |
+| 11 | Nome e Cognome | Single Line Text | obbligatorio |
 | 13 | Email | Email | obbligatorio |
 | 14 | Telefono | Phone | formato internazionale |
-| 15 | Consenso privacy | Consent | link all'informativa |
+| 15 | Consenso privacy | Consent | non e. nel modulo originale; resta per liceita. del trattamento |
 | 20 | Lead UID | Hidden | popolato dinamicamente (§1) |
+
+Pulsante: **Invia**.
 
 ### Provenienza dei campi
 
@@ -100,14 +115,11 @@ Form ID 1, tre pagine, indicatore di avanzamento = **Progress Bar**.
   online su `immobilieffegi.it/valuta-il-tuo-immobile/`.
 - **Nome, Cognome, Email, Telefono, consenso** → campi reali del modulo
   contatti Effegi sulla stessa pagina.
-- **Tipologia, superficie, anno, locali, stato** → derivati dai *"6 principali
-  criteri per la valutazione di un immobile"* dichiarati dalla reference
-  Engel & Völkers: ubicazione, anno di costruzione, condizioni, tipo di
-  proprietà, caratteristiche, domanda e offerta.
+- **Tutti i campi dello step 2** → campi reali dello step 2 del form Effegi,
+  trascritti dagli screenshot forniti dal cliente.
 
-> Da far confermare al cliente prima della messa in opera. Gli step 2 e 3 del
-> form attuale non sono leggibili dall'esterno: vengono generati dal server
-> solo dopo l'invio dello step 1.
+> Restano da verificare due sole liste chiuse, che negli screenshot erano
+> tende non aperte: le voci di **Tipologia** e di **Classe energetica**.
 
 ---
 

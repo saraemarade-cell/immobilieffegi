@@ -116,12 +116,10 @@
 
     <div class="hero__inner container">
       <div class="hero__lens-wrap">
-        <!-- Lente — riquadro più grande del form, dietro di esso: nella
-             cornice visibile tutt'intorno si vede la stessa porzione di
-             sfondo che sta dietro la lente, ingrandita. Allineamento
-             ottico (statico, nessuna animazione): assets/js/main.js
-             (initHeroLens). -->
-        <span class="lens-layer" aria-hidden="true"></span>
+        <!-- La lente (riquadro ingrandito dietro al form) e. stata rimossa su
+             richiesta: su schermi stretti si riduceva a due fasce e su quelli
+             larghi rubava attenzione al form. initHeroLens in main.js non ha
+             piu. nulla da allineare ed esce subito. -->
 
         <div class="hero__panel hero__panel--glass" id="form-valutazione" data-reveal="stagger" data-reveal-order="1">
         <div class="hero__panel-content">
@@ -197,59 +195,17 @@
               <form method="post" id="gform_1" class="quiz-form" novalidate>
                 <div class="gform-body gform_body">
 
-                  <!-- ========== STEP 1 — LA DOMANDA ========== -->
+                  <!-- ========== STEP 1 — DOVE SI TROVA ==========
+                       Ricalca lo step 1 del form Effegi oggi online su
+                       immobilieffegi.it/vendita-immobili: Comune, Indirizzo,
+                       Civico e un solo pulsante di avanzamento. -->
                   <div id="gform_page_1_1" class="gform_page" data-quiz-page="1">
                     <div class="gform_page_fields">
                       <div id="gform_fields_1" class="gform_fields top_label">
 
-                        <div id="field_1_1" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
-                          <label class="gfield_label gform-field-label" id="field_1_1_label">
-                            Che tipo di immobile vuoi valutare?
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
-                          </label>
-                          <div class="ginput_container ginput_container_radio">
-                            <div class="gfield_radio gfield_radio--cards" id="input_1_1" role="radiogroup" aria-labelledby="field_1_1_label" data-autoadvance>
-                              <div class="gchoice gchoice_1_1_0">
-                                <input class="gfield-choice-input" name="input_1" type="radio" value="Appartamento" id="choice_1_1_0" required>
-                                <label for="choice_1_1_0" class="gform-field-label gform-field-label--type-inline">Appartamento</label>
-                              </div>
-                              <div class="gchoice gchoice_1_1_1">
-                                <input class="gfield-choice-input" name="input_1" type="radio" value="Casa indipendente" id="choice_1_1_1">
-                                <label for="choice_1_1_1" class="gform-field-label gform-field-label--type-inline">Casa indipendente</label>
-                              </div>
-                              <div class="gchoice gchoice_1_1_2">
-                                <input class="gfield-choice-input" name="input_1" type="radio" value="Villa o villetta a schiera" id="choice_1_1_2">
-                                <label for="choice_1_1_2" class="gform-field-label gform-field-label--type-inline">Villa o villetta a schiera</label>
-                              </div>
-                              <div class="gchoice gchoice_1_1_3">
-                                <input class="gfield-choice-input" name="input_1" type="radio" value="Altro" id="choice_1_1_3">
-                                <label for="choice_1_1_3" class="gform-field-label gform-field-label--type-inline">Altro</label>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
-                        </div>
-
-                      </div>
-                    </div>
-                    <div class="gform_page_footer top_label">
-                      <p class="form-card__legal form-card__legal--left">Gratuita, confidenziale e senza impegno.</p>
-                    </div>
-                  </div>
-
-                  <!-- ========== STEP 2 — IL TUO IMMOBILE ========== -->
-                  <div id="gform_page_1_2" class="gform_page" data-quiz-page="2" style="display:none">
-                    <div class="gform_page_fields">
-                      <div class="gform_fields top_label">
-
-                        <div class="gfield gfield--type-html gfield--width-full">
-                          <p class="quiz-question">Dove si trova?</p>
-                        </div>
-
                         <div id="field_1_2" class="gfield gfield--type-text gfield--width-full gfield_contains_required">
                           <label class="gfield_label gform-field-label" for="input_1_2">
-                            Comune
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                            Comune<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
                           </label>
                           <div class="ginput_container ginput_container_text">
                             <input name="input_2" id="input_1_2" type="text" class="large"
@@ -260,8 +216,7 @@
 
                         <div id="field_1_3" class="gfield gfield--type-text gfield--width-two-thirds gfield_contains_required">
                           <label class="gfield_label gform-field-label" for="input_1_3">
-                            Indirizzo
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                            Indirizzo<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
                           </label>
                           <div class="ginput_container ginput_container_text">
                             <input name="input_3" id="input_1_3" type="text" class="large"
@@ -272,8 +227,7 @@
 
                         <div id="field_1_4" class="gfield gfield--type-text gfield--width-one-third gfield_contains_required">
                           <label class="gfield_label gform-field-label" for="input_1_4">
-                            Civico
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                            Civico<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
                           </label>
                           <div class="ginput_container ginput_container_text">
                             <input name="input_4" id="input_1_4" type="text" class="large"
@@ -281,70 +235,168 @@
                           </div>
                           <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
-                        <div class="gfield gfield--type-html gfield--width-full">
-                          <p class="quiz-question quiz-question--sub">Com&rsquo;&egrave; fatto?</p>
+
+                      </div>
+                    </div>
+                    <div class="gform_page_footer top_label">
+                      <button type="button" id="gform_next_button_1_4" class="gform_next_button gform-theme-button btn btn--accent"
+                              data-quiz-next data-track="valuation_step_1_submit">
+                        <span>Scopri ora</span>
+                      </button>
+                      <p class="form-card__legal form-card__legal--left">Gratuita, confidenziale e senza impegno.</p>
+                    </div>
+                  </div>
+                  <!-- ========== STEP 2 — CARATTERISTICHE ==========
+                       Ricalca lo step 2 del form Effegi: tipologia, numero di
+                       locali, numero di bagni, superficie, condizione, classe
+                       energetica, dotazioni e tempistica di vendita.
+                       Due note sulle liste chiuse: le voci delle tende
+                       "Tipologia" e "Classe energetica" non erano leggibili
+                       negli screenshot (erano chiuse). Per la classe energetica
+                       si usano le classi APE di legge; per la tipologia restano
+                       le quattro gia concordate. Entrambe da verificare sul
+                       form originale. -->
+                  <div id="gform_page_1_2" class="gform_page" data-quiz-page="2" style="display:none">
+                    <div class="gform_page_fields">
+                      <div class="gform_fields top_label">
+
+                        <div id="field_1_1" class="gfield gfield--type-select gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_1">
+                            Tipologia<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_select">
+                            <select name="input_1" id="input_1_1" class="large gfield_select" required>
+                              <option value="">Tipologia</option>
+                              <option value="Appartamento">Appartamento</option>
+                              <option value="Casa indipendente">Casa indipendente</option>
+                              <option value="Attico/Mansarda">Attico/Mansarda</option>
+                              <option value="Villa">Villa</option>
+                              <option value="Villetta a schiera">Villetta a schiera</option>
+                              <option value="Casa Bi / Trifagliare">Casa Bi / Trifagliare</option>
+                              <option value="Rustico / Casale">Rustico / Casale</option>
+                              <option value="Loft">Loft</option>
+                            </select>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_8" class="gfield gfield--type-number gfield--width-half gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_8">
+                            Numero di locali<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_number">
+                            <!-- In Gravity Forms questo e un campo Number: i due
+                                 pulsanti sono nostri (JS), il valore resta nel
+                                 campo, che funziona anche senza di loro. -->
+                            <div class="quiz-stepper" data-stepper>
+                              <button type="button" class="quiz-stepper__btn" data-stepper-dec aria-label="Diminuisci il numero di locali">&minus;</button>
+                              <input name="input_8" id="input_1_8" type="number" min="1" max="20" step="1" value="1"
+                                     class="quiz-stepper__input" inputmode="numeric" required>
+                              <button type="button" class="quiz-stepper__btn" data-stepper-inc aria-label="Aumenta il numero di locali">+</button>
+                            </div>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
 
                         <div id="field_1_6" class="gfield gfield--type-number gfield--width-half gfield_contains_required">
                           <label class="gfield_label gform-field-label" for="input_1_6">
-                            Superficie
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                            Superficie<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_number quiz-field--suffix" data-suffix="m&sup2;">
+                            <input name="input_6" id="input_1_6" type="number" min="15" max="2000" step="1"
+                                   class="large" placeholder="Superficie" inputmode="numeric" required>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+
+                        <div id="field_1_5" class="gfield gfield--type-number gfield--width-half gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_5">
+                            Numero di bagni<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
                           </label>
                           <div class="ginput_container ginput_container_number">
-                            <input name="input_6" id="input_1_6" type="number" min="15" max="2000" step="1"
-                                   class="large" placeholder="mq" inputmode="numeric" required>
+                            <div class="quiz-stepper" data-stepper>
+                              <button type="button" class="quiz-stepper__btn" data-stepper-dec aria-label="Diminuisci il numero di bagni">&minus;</button>
+                              <input name="input_5" id="input_1_5" type="number" min="1" max="10" step="1" value="1"
+                                     class="quiz-stepper__input" inputmode="numeric" required>
+                              <button type="button" class="quiz-stepper__btn" data-stepper-inc aria-label="Aumenta il numero di bagni">+</button>
+                            </div>
                           </div>
                           <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
 
                         <div id="field_1_7" class="gfield gfield--type-select gfield--width-half gfield_contains_required">
                           <label class="gfield_label gform-field-label" for="input_1_7">
-                            Anno di costruzione
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                            Classe energetica<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
                           </label>
                           <div class="ginput_container ginput_container_select">
                             <select name="input_7" id="input_1_7" class="large gfield_select" required>
-                              <option value="">Seleziona…</option>
-                              <option value="Prima del 1950">Prima del 1950</option>
-                              <option value="1950-1979">1950 – 1979</option>
-                              <option value="1980-1999">1980 – 1999</option>
-                              <option value="2000-2010">2000 – 2010</option>
-                              <option value="Dopo il 2010">Dopo il 2010</option>
+                              <option value="">Classe energetica</option>
                               <option value="Non lo so">Non lo so</option>
+                              <option value="A">A</option>
+                              <option value="B">B</option>
+                              <option value="C">C</option>
+                              <option value="D">D</option>
+                              <option value="E">E</option>
+                              <option value="F">F</option>
+                              <option value="G">G</option>
                             </select>
                           </div>
                           <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
 
-                        <div id="field_1_8" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
-                          <label class="gfield_label gform-field-label" id="field_1_8_label">
-                            Quanti locali?
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+
+                        <div id="field_1_9" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" id="field_1_9_label">
+                            Condizione dell&rsquo;immobile<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
                           </label>
                           <div class="ginput_container ginput_container_radio">
-                            <div class="gfield_radio gfield_radio--cards gfield_radio--compact" id="input_1_8" role="radiogroup" aria-labelledby="field_1_8_label">
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="1" id="choice_1_8_0" required><label for="choice_1_8_0" class="gform-field-label gform-field-label--type-inline">1</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="2" id="choice_1_8_1"><label for="choice_1_8_1" class="gform-field-label gform-field-label--type-inline">2</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="3" id="choice_1_8_2"><label for="choice_1_8_2" class="gform-field-label gform-field-label--type-inline">3</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="4" id="choice_1_8_3"><label for="choice_1_8_3" class="gform-field-label gform-field-label--type-inline">4</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_8" type="radio" value="5 o più" id="choice_1_8_4"><label for="choice_1_8_4" class="gform-field-label gform-field-label--type-inline">5+</label></div>
+                            <div class="gfield_radio gfield_radio--cards" id="input_1_9" role="radiogroup" aria-labelledby="field_1_9_label">
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Nuovo/Ristrutturato" id="choice_1_9_0" required><label for="choice_1_9_0" class="gform-field-label gform-field-label--type-inline">Nuovo/Ristrutturato</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Buono/Abitabile" id="choice_1_9_1"><label for="choice_1_9_1" class="gform-field-label gform-field-label--type-inline">Buono/Abitabile</label></div>
+                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Da ristrutturare" id="choice_1_9_2"><label for="choice_1_9_2" class="gform-field-label gform-field-label--type-inline">Da ristrutturare</label></div>
                             </div>
                           </div>
                           <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
 
-                        <div id="field_1_9" class="gfield gfield--type-radio gfield--width-full gfield_contains_required">
-                          <label class="gfield_label gform-field-label" id="field_1_9_label">
-                            In che stato si trova?
-                            <span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
-                          </label>
-                          <div class="ginput_container ginput_container_radio">
-                            <div class="gfield_radio gfield_radio--cards" id="input_1_9" role="radiogroup" aria-labelledby="field_1_9_label" data-autoadvance>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Da ristrutturare" id="choice_1_9_0" required><label for="choice_1_9_0" class="gform-field-label gform-field-label--type-inline">Da ristrutturare</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Buono stato" id="choice_1_9_1"><label for="choice_1_9_1" class="gform-field-label gform-field-label--type-inline">Buono stato</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Ottimo stato" id="choice_1_9_2"><label for="choice_1_9_2" class="gform-field-label gform-field-label--type-inline">Ottimo stato</label></div>
-                              <div class="gchoice"><input class="gfield-choice-input" name="input_9" type="radio" value="Nuovo o ristrutturato" id="choice_1_9_3"><label for="choice_1_9_3" class="gform-field-label gform-field-label--type-inline">Nuovo o ristrutturato</label></div>
+                        <!-- Dotazioni: in Gravity Forms resta un campo
+                             Checkboxes (scelta multipla). Il pannello a tendina
+                             e un involucro nostro: le caselle sono quelle di GF,
+                             restano nel DOM e funzionano anche senza il JS, che
+                             si limita ad aprire e chiudere il pannello e a
+                             scrivere il riepilogo sul pulsante. -->
+                        <div id="field_1_10" class="gfield gfield--type-checkbox gfield--width-full">
+                          <label class="gfield_label gform-field-label" id="field_1_10_label">L&rsquo;immobile dispone di:</label>
+                          <div class="ginput_container ginput_container_checkbox">
+                            <div class="quiz-multi" data-multi data-multi-empty="Seleziona…">
+                              <button type="button" class="quiz-multi__toggle" data-multi-toggle
+                                      aria-expanded="false" aria-controls="input_1_10">
+                                <span class="quiz-multi__value" data-multi-value>Seleziona…</span>
+                              </button>
+                              <div class="gfield_checkbox quiz-multi__panel" id="input_1_10" role="group" aria-labelledby="field_1_10_label" hidden>
+                                <div class="gchoice"><input class="gfield-choice-input" name="input_10[]" type="checkbox" value="Arredamento" id="choice_1_10_1"><label for="choice_1_10_1" class="gform-field-label gform-field-label--type-inline">Arredamento</label></div>
+                                <div class="gchoice"><input class="gfield-choice-input" name="input_10[]" type="checkbox" value="Impianto di riscaldamento" id="choice_1_10_2"><label for="choice_1_10_2" class="gform-field-label gform-field-label--type-inline">Impianto di riscaldamento</label></div>
+                                <div class="gchoice"><input class="gfield-choice-input" name="input_10[]" type="checkbox" value="Giardino privato" id="choice_1_10_3"><label for="choice_1_10_3" class="gform-field-label gform-field-label--type-inline">Giardino privato</label></div>
+                                <div class="gchoice"><input class="gfield-choice-input" name="input_10[]" type="checkbox" value="Posto auto/Garage" id="choice_1_10_4"><label for="choice_1_10_4" class="gform-field-label gform-field-label--type-inline">Posto auto/Garage</label></div>
+                                <div class="gchoice"><input class="gfield-choice-input" name="input_10[]" type="checkbox" value="Aria condizionata" id="choice_1_10_5"><label for="choice_1_10_5" class="gform-field-label gform-field-label--type-inline">Aria condizionata</label></div>
+                                <div class="gchoice"><input class="gfield-choice-input" name="input_10[]" type="checkbox" value="Balcone/Terrazzo" id="choice_1_10_6"><label for="choice_1_10_6" class="gform-field-label gform-field-label--type-inline">Balcone/Terrazzo</label></div>
+                              </div>
                             </div>
+                          </div>
+                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
+                        </div>
+                        <div id="field_1_16" class="gfield gfield--type-select gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_16">
+                            Quando vuoi mettere l&rsquo;immobile sul mercato?<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span>
+                          </label>
+                          <div class="ginput_container ginput_container_select">
+                            <select name="input_16" id="input_1_16" class="large gfield_select" required>
+                              <option value="">Seleziona…</option>
+                              <option value="Il più presto possibile">Il più presto possibile</option>
+                              <option value="Entro 6 mesi">Entro 6 mesi</option>
+                              <option value="Entro 12 mesi">Entro 12 mesi</option>
+                              <option value="Non ora, voglio solo una valutazione">Non ora, voglio solo una valutazione</option>
+                            </select>
                           </div>
                           <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
@@ -352,17 +404,22 @@
                       </div>
                     </div>
                     <div class="gform_page_footer top_label">
-                      <button type="button" id="gform_previous_button_1_5" class="gform_previous_button gform-theme-button gform-theme-button--secondary btn btn--ghost btn--sm" data-quiz-prev>
+                      <button type="button" id="gform_previous_button_1_16b" class="gform_previous_button gform-theme-button gform-theme-button--secondary btn btn--ghost btn--sm" data-quiz-prev>
                         <span>Indietro</span>
                       </button>
-                      <button type="button" id="gform_next_button_1_5" class="gform_next_button gform-theme-button btn btn--accent"
-                              data-quiz-next data-track="valuation_step_1_submit">
-                        <span>Continua</span>
+                      <button type="button" id="gform_next_button_1_16" class="gform_next_button gform-theme-button btn btn--accent"
+                              data-quiz-next data-track="valuation_step_2_submit">
+                        <span>Avanti</span>
                       </button>
                     </div>
                   </div>
 
-                  <!-- ========== STEP 3 — I TUOI DATI ========== -->
+
+                  <!-- ========== STEP 3 — I TUOI DATI ==========
+                       Ricalca il modulo contatti Effegi: Nome e Cognome in un
+                       campo solo, Email, Telefono, pulsante "Invia". Il consenso
+                       privacy non compare nel modulo originale ma resta qui:
+                       senza, la raccolta del contatto non sarebbe lecita. -->
                   <div id="gform_page_1_3" class="gform_page" data-quiz-page="3" style="display:none">
                     <div class="gform_page_fields">
                       <div class="gform_fields top_label">
@@ -371,18 +428,10 @@
                           <p class="quiz-recap" data-quiz-recap aria-live="polite"></p>
                         </div>
 
-                        <div id="field_1_11" class="gfield gfield--type-text gfield--width-half gfield_contains_required">
-                          <label class="gfield_label gform-field-label" for="input_1_11">Nome<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
+                        <div id="field_1_11" class="gfield gfield--type-text gfield--width-full gfield_contains_required">
+                          <label class="gfield_label gform-field-label" for="input_1_11">Nome e Cognome<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
                           <div class="ginput_container ginput_container_text">
-                            <input name="input_11" id="input_1_11" type="text" class="large" placeholder="Nome" autocomplete="given-name" required>
-                          </div>
-                          <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
-                        </div>
-
-                        <div id="field_1_12" class="gfield gfield--type-text gfield--width-half gfield_contains_required">
-                          <label class="gfield_label gform-field-label" for="input_1_12">Cognome<span class="gfield_required"><span class="gfield_required gfield_required_asterisk">*</span></span></label>
-                          <div class="ginput_container ginput_container_text">
-                            <input name="input_12" id="input_1_12" type="text" class="large" placeholder="Cognome" autocomplete="family-name" required>
+                            <input name="input_11" id="input_1_11" type="text" class="large" placeholder="Nome e Cognome" autocomplete="name" required>
                           </div>
                           <div class="gfield_description validation_message gfield_validation_message" role="alert" hidden></div>
                         </div>
@@ -421,13 +470,12 @@
                         <span>Indietro</span>
                       </button>
                       <button type="submit" id="gform_submit_button_1" class="gform_button gform-theme-button btn btn--accent" data-track="lead_submit">
-                        <span>Richiedi la valutazione</span>
+                        <span>Invia</span>
                       </button>
                     </div>
                   </div>
 
                 </div>
-
                 <!-- Identificativo del lead: in Gravity Forms è un campo
                      nascosto popolato da gform_field_value_effegi_lead_uid.
                      Serve a ricondurre allo stesso contatto i salvataggi
